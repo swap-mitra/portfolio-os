@@ -47,17 +47,20 @@ App
 
 export type AppType = 'about' | 'projects' | 'resume' | 'contact' | 'terminal';
 
-export interface WindowState {
-  id: string;
-  appType: AppType;
+export interface WindowBounds {
   x: number;
   y: number;
   width: number;
   height: number;
+}
+
+export interface WindowState extends WindowBounds {
+  id: string;          // today always equals appType — see note below
+  appType: AppType;
   zIndex: number;
   minimized: boolean;
   maximized: boolean;
-  prevBounds?: { x: number; y: number; width: number; height: number }; // restored on un-maximize
+  prevBounds?: WindowBounds; // restored on un-maximize
 }
 
 export interface MusicState {
@@ -73,13 +76,23 @@ export interface MusicState {
 export interface OSState {
   windows: Record<string, WindowState>;
   focusedWindowId: string | null;
-  selectedIconId: string | null;
+  selectedIconId: AppType | null;
   startMenuOpen: boolean;
+  shuttingDown: boolean;   // joke shutdown overlay (project-spec.md FR7)
   nextZIndex: number;      // incrementing counter for bring-to-front
   music: MusicState;
   reducedMotion: boolean;  // mirrors prefers-reduced-motion, read once + subscribed
 }
 ```
+
+Four changes from this doc's first draft, all made in SPIKE-03 and validated by a hand-built sample state in `src/types/os.test.ts`:
+
+- **`WindowBounds` extracted as a named interface**, with `WindowState` extending it. `prevBounds`, the maximize/restore logic, and the move/resize action payloads all pass the same four numbers, so the shape earned a name.
+- **`selectedIconId` narrowed from `string` to `AppType | null`.** The desktop has exactly one icon per app, so a wider type only permits typos that the compiler would otherwise catch.
+- **`shuttingDown: boolean` added.** FR7's "Shut Down" joke overlay is real UI state and had no home in the original shape. It can't live inside `StartMenu` as local state, because picking the menu item closes the menu — the overlay has to outlive it.
+- **`id` is documented as equal to `appType`.** The mockup opens at most one window per app (its taskbar tab toggles a single Projects window), so `OPEN_WINDOW` on an already-open app focuses the existing window rather than creating a duplicate. The field stays typed `string` so permitting multiple instances later needs no type change.
+
+**Deliberately not added: a `windowOrder: string[]` field.** The taskbar needs a stable tab order that doesn't reshuffle on every focus change, which at first looks like it needs an explicit order array. It doesn't: JavaScript guarantees non-integer-like string keys iterate in insertion order, the window IDs are app names and so never integer-like, and assigning to an existing key preserves its original position — so a drag or a focus change can't reorder the tabs. A parallel array would be a second source of truth that can desync from `windows`. See SPIKE-03's decision log.
 
 **Where it lives:** React Context + `useReducer` (`src/state/osReducer.ts` + `src/state/osContext.tsx`). No Redux/Zustand needed at this scope. Reducer actions: `OPEN_WINDOW`, `CLOSE_WINDOW`, `FOCUS_WINDOW`, `MOVE_WINDOW`, `RESIZE_WINDOW`, `MINIMIZE_WINDOW`, `TOGGLE_MAXIMIZE`, `SELECT_ICON`, `TOGGLE_START_MENU`, `LOAD_TRACK`, `PLAY_MUSIC`, `PAUSE_MUSIC`, `SET_VOLUME`, `TOGGLE_MUTE`, `MUSIC_GESTURE_RESOLVED`, `SET_REDUCED_MOTION`.
 
