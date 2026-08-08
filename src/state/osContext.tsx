@@ -1,11 +1,12 @@
 /* React Context + useReducer wiring for the OS state (architecture.md §3).
    No Redux/Zustand at this scope. */
 
-import { createContext, useContext, useMemo, useReducer } from 'react'
+import { createContext, useContext, useEffect, useMemo, useReducer } from 'react'
 import type { Dispatch, ReactNode } from 'react'
 import type { OSState } from '../types/os'
-import { initialState, osReducer } from './osReducer'
+import { osReducer } from './osReducer'
 import type { Action } from './osReducer'
+import { hydrateInitialState, saveMusicState } from './persistence'
 
 interface OSContextValue {
   state: OSState
@@ -18,13 +19,27 @@ const OSContext = createContext<OSContextValue | undefined>(undefined)
 
 export function OSProvider({
   children,
-  initial = initialState,
+  initial,
 }: {
   children: ReactNode
-  /** Override for tests, and for merging persisted state on load (SPIKE-05). */
+  /** Full state override for tests. When given, persisted preferences are not
+      merged in — the caller gets exactly the state they asked for. */
   initial?: OSState
 }) {
-  const [state, dispatch] = useReducer(osReducer, initial)
+  /* Third argument is React's lazy initializer: it runs once, so the
+     localStorage read doesn't repeat on every render (SPIKE-05). */
+  const [state, dispatch] = useReducer(
+    osReducer,
+    initial,
+    (override) => override ?? hydrateInitialState(),
+  )
+
+  /* Mirror music preferences back to localStorage. Debounced inside
+     saveMusicState, since a volume drag fires a change per pixel. */
+  useEffect(() => {
+    saveMusicState(state.music)
+  }, [state.music])
+
   const value = useMemo(() => ({ state, dispatch }), [state])
 
   return <OSContext.Provider value={value}>{children}</OSContext.Provider>

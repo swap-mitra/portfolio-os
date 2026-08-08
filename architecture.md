@@ -107,7 +107,15 @@ Four differ from this doc's original list:
 
 **`TOGGLE_MAXIMIZE` carries a `viewport: { width, height }` payload.** Maximized size depends on the window size, and the reducer stays pure — it never reads `window.innerWidth` itself. Same reasoning for why clamping a drag to the viewport lives in the drag hook (§5) rather than in `MOVE_WINDOW`.
 
-**Persistence (optional):** mirror `windows` and `music.videoId`/`music.volume` to `localStorage` (`src/state/persistence.ts`) so a returning visitor's layout and last-picked track survive a refresh. Not required for launch.
+**Persistence — decided in SPIKE-05, and it's a split decision:** music preferences persist, **window layout deliberately does not**.
+
+`src/state/persistence.ts` mirrors exactly four fields to `localStorage` under the key `portfolio-os:music:v1` — `videoId`, `isDefaultTrack`, `volume`, `isMuted` — debounced at 300ms, and merges them over the defaults on load via `hydrateInitialState()`.
+
+- **Why layout is not persisted.** Restoring windows means a returning visitor lands on a desktop already covered in windows and never sees the cityscape, icons, and taskbar the whole design exists to show. Worse, window coordinates are viewport-relative: a layout saved on a wide monitor reopens partly off-screen on a laptop, so shipping it would also mean shipping re-clamping logic. It's the most complex part of the state carrying the least benefit. Listed in §14 as an optional extension.
+- **Why music preferences are.** They're four viewport-independent scalars, and silently re-blasting audio at a volume the visitor already turned down — or throwing away the track they chose — is the kind of thing that gets a tab closed.
+- **Never restored, on purpose:** `isPlaying` and `awaitingUserGesture` are pinned back to `false`/`true` on every load, because the autoplay policy (§8.3) applies to a returning visitor exactly as it does to a new one. A stored `lastError` is dropped too — a stale error message on a fresh load is nonsense.
+- **Reads treat stored data as untrusted input.** Absent, malformed, hand-edited, non-object, wrong-typed, out-of-range, and future-schema data are all handled by discarding *the individual bad field* and using the default, so one corrupt value doesn't cost the visitor their other preferences. `videoId` is validated against `/^[A-Za-z0-9_-]{11}$/` before it can ever reach `loadVideoById`. Merging (rather than replacing) means a field added to `MusicState` later still gets its default for a visitor whose stored blob predates it. Accessing `localStorage` is itself wrapped in `try`/`catch` — it throws outright in Safari private mode and with cookies blocked.
+- The schema version lives in the key, so a future shape change moves to `:v2` and stale `v1` data is simply ignored — no migration code.
 
 ## 4. Data layer
 
@@ -334,4 +342,5 @@ The full starting-point workflow YAML lives in `spikes.md` SPIKE-01 — treat th
 - A boot sequence animation before the desktop first appears.
 - A theme switcher for alternate neon palettes.
 - A "guestbook" or visitor counter as a nostalgic easter egg.
+- Persisting **window layout** to `localStorage` (music preferences already persist). Deliberately skipped for v1 in SPIKE-05 — see §3 for why. Would need viewport re-clamping on load to be worth having.
 - Self-hosting the two fonts via `@fontsource/press-start-2p` + `@fontsource/vt323` instead of the Google Fonts CDN (removes two third-party requests and works offline in dev — see §6; only worth it if SPIKE-32's Lighthouse pass shows the fonts hurting LCP).
