@@ -1,0 +1,32 @@
+/* Design tokens — ported verbatim from portfolio-os-mockup.html.
+   Do not reinterpret these values; the mockup is the approved reference
+   (project-spec.md §5, architecture.md §6). */
+
+:root {
+  --ink: #0b0b16;
+  --ink-2: #14142a;
+  --ink-3: #1d1d3a;
+  --paper: #e8e6f0;
+  --magenta: #ff2e6b;
+  --cyan: #23f0ff;
+  --yellow: #ffe14d;
+  --green: #39ff88;
+
+  /* Font stacks. 'Press Start 2P' is display only — titles, labels, buttons.
+     'VT323' is body text inside windows. Both fall back to monospace so an
+     unavailable webfont degrades to something still in the right spirit. */
+  --font-display: 'Press Start 2P', monospace;
+  --font-body: 'VT323', monospace;
+
+  /* Layer stack, back to front (architecture.md §6). Named so components
+     can't drift out of agreement about who sits above whom. */
+  --z-cityscape: 0;
+  --z-starfield: 5;
+  --z-icons: 10;
+  --z-windows: 20;
+  --z-wordmark: 40;
+  --z-scanlines: 50;
+  --z-music: 55;
+  --z-taskbar: 60;
+  --z-startmenu: 70;
+}

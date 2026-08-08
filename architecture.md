@@ -124,8 +124,11 @@ Reuse exactly what's in the mockup:
 
 - **Display/UI font:** `Press Start 2P` — titles/labels/buttons only.
 - **Body font:** `VT323` — all readable content inside windows.
+- **Font loading (decided in SPIKE-02):** Google Fonts `<link>` tags in `index.html`, matching the mockup exactly — two `preconnect` hints plus one stylesheet request with `display=swap`. Self-hosting via `@fontsource/*` is a possible later optimisation (see §14), not done now: two dependencies to remove two requests isn't worth it on a two-font site.
+- Both families are also exposed as `--font-display` / `--font-body` in `tokens.css` so the literal font stack isn't repeated per component. The mockup's `.pixel` helper class is kept, since it's what the ported markup uses.
+- `global.css` keeps the mockup's `-webkit-font-smoothing: none` — that's what stops the pixel fonts being antialiased into mush, so it isn't incidental.
 - **Icons:** inline SVG, 10×10 unit viewBox, `shapeRendering="crispEdges"`, one flat color per icon.
-- **Layer stack (z-index, back to front):** `CityscapeBackground` (0) → `Starfield` (5) → desktop icons (10) → windows (20+, dynamic) → `ScanlineOverlay` (50) → `MusicPlayer` widget (55) → `Taskbar` + `StartMenu` (60/70).
+- **Layer stack (z-index, back to front):** `CityscapeBackground` (0) → `Starfield` (5) → desktop icons (10) → windows (20+, dynamic) → wordmark (40) → `ScanlineOverlay` (50) → `MusicPlayer` widget (55) → `Taskbar` (60) → `StartMenu` (70). These are the mockup's own values; the wordmark's 40 was implicit there and is written out here. All of them exist as `--z-*` custom properties in `tokens.css` — layering is a cross-component contract, so it shouldn't live as magic numbers spread across components.
 
 ## 7. Live background: neon cityscape
 
@@ -191,7 +194,7 @@ The feature works with any YouTube URL, including whichever one you set as the d
 - Icons and window controls keyboard-operable (`tabIndex`, `Enter`/`Space` to activate, visible focus rings).
 - `Escape` closes the focused window or an open Start Menu.
 - `prefers-reduced-motion` disables/simplifies: scanline flicker, starfield twinkle, and the cityscape's parallax scroll + car animation (freeze on a static frame rather than removing the art entirely).
-- Neon-on-dark palettes can fail contrast checks — verify `--paper` on `--ink`/`--ink-2` passes WCAG AA for body text; keep the brightest neon colors for short labels/accents.
+- **Contrast: measured in SPIKE-02, and the palette is clear.** All 15 combinations of the five foreground tokens against the three dark backgrounds pass WCAG AA for body text (4.5:1). `--paper` on `--ink` is 15.84:1 and on `--ink-2` 14.62:1. `--magenta` on `--ink` — the pair most likely to fail — is 5.45:1, and the weakest pair overall (`--magenta` on `--ink-3`) is still 4.54:1. Reversed chrome text also passes: `--ink` on `--magenta` (title bar) 5.45:1, on `--yellow` (Start button) 15.02:1, on `--cyan` (selected icon label) 13.95:1. So no palette adjustment is needed, and keeping neon to short labels is a stylistic preference here rather than an accessibility requirement.
 - Audio is never forced on unmuted without a gesture (§8.3), and the mute control must always be visible and reachable by keyboard — background music is a delight feature, not something that should trap or annoy anyone.
 - **Mobile fallback:** below ~768px, tapping an icon opens its app fullscreen (one at a time, with a close/back control) instead of a floating window.
 
@@ -300,3 +303,4 @@ The full starting-point workflow YAML lives in `spikes.md` SPIKE-01 — treat th
 - A boot sequence animation before the desktop first appears.
 - A theme switcher for alternate neon palettes.
 - A "guestbook" or visitor counter as a nostalgic easter egg.
+- Self-hosting the two fonts via `@fontsource/press-start-2p` + `@fontsource/vt323` instead of the Google Fonts CDN (removes two third-party requests and works offline in dev — see §6; only worth it if SPIKE-32's Lighthouse pass shows the fonts hurting LCP).

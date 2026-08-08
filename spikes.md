@@ -205,9 +205,19 @@ Work through spikes roughly in phase order — later phases assume earlier ones 
 **Exit criteria:** the test page's colors and fonts are visually identical to the mockup.
 
 **Decision log:**
-- Decision (CDN vs self-hosted fonts):
+- Decision (CDN vs self-hosted fonts): **Google Fonts CDN `<link>` tags**, identical to the mockup's (both `preconnect` hints plus one stylesheet request with `display=swap`). Self-hosting via `@fontsource/press-start-2p` + `@fontsource/vt323` is deliberately *not* done now: it would add two dependencies and put font bytes in the build to remove two third-party requests on a two-font static site. Recorded as a future optimisation in `architecture.md` §6/§14 rather than a to-do — revisit only if the fonts measurably hurt LCP in SPIKE-32's Lighthouse pass, or if offline dev becomes annoying.
 - Notes:
-- Architecture.md impact: §6 — note the final font-loading decision.
+  - Tokens were ported **verbatim and verified as such, not by eye**: extracted the `--name:#hex` pairs from both `portfolio-os-mockup.html`'s `:root` block and `src/styles/tokens.css` and diffed them — all 8 identical, zero differences. Same check on the font URL: the `family=Press+Start+2P&family=VT323&display=swap` query string matches the mockup's exactly.
+  - Split into two files as the spike specified: `tokens.css` (custom properties only) and `global.css` (the `*` box-sizing reset and the `html,body` rule from the mockup, including `-webkit-font-smoothing: none`, which matters — it's what keeps the pixel fonts crisp instead of antialiased). Both imported from `main.tsx`, tokens first.
+  - **Added two things the mockup only had implicitly:**
+    - `--font-display` / `--font-body` custom properties, so `'Press Start 2P', monospace` isn't re-typed in a dozen components (the mockup repeats that literal string 7 times). The `.pixel` helper class from the mockup is kept as well, since it's what the mockup's markup uses.
+    - `--z-*` custom properties for the whole layer stack from `architecture.md` §6. The layering is a cross-component contract; leaving it as magic numbers scattered across components is how a background ends up on top of the taskbar.
+  - `#root { height: 100% }` was needed and isn't in the mockup — the mockup's `#desktop` is a direct child of `body`, but in React it sits inside `#root`, which would otherwise collapse and break the `height: 100vh` desktop.
+  - Moved the mockup's `.icon:focus-visible` ring to a global `:focus-visible` rule instead of an icon-scoped one, since every interactive element in the app needs it and the neon-on-dark palette makes the browser default nearly invisible. Early partial credit for SPIKE-28.
+  - **Verified visually against the mockup by screenshotting both** in headless Chrome at the same viewport, not by assuming the CSS was right: both fonts load and render (Press Start 2P on the pixel headings, VT323 on body copy), and the magenta title bar / cyan taskbar border / yellow Start button / green clock all read the same in both. `src/App.tsx` currently holds a throwaway token-proof page that renders all 8 swatches plus mockup-matched window and taskbar chrome; it gets replaced by the real `Desktop` in Phase 2/3.
+  - One cosmetic non-issue: the `▸` glyph in "▸ START" isn't in Press Start 2P, so it falls back to a system font. This happens identically in the mockup, so it's inherited-as-approved rather than a porting error.
+  - **Bonus finding — the palette's contrast risk isn't real.** `architecture.md` §10 warned neon-on-dark "can fail contrast checks", so all 15 foreground/background pairs were actually computed against WCAG. Everything passes AA for body text, with the weakest pair still at 4.54:1. `--paper` on `--ink` is 15.84:1; `--magenta` on `--ink` is 5.45:1, which is the one I expected to fail and doesn't. So no palette adjustment is needed and magenta is safe for text, not just chrome. Recorded in §10 so it isn't re-litigated later.
+- Architecture.md impact: §6 — recorded the CDN font-loading decision, the two font/z-index custom-property additions, and the explicit wordmark layer value. §10 — replaced the "verify this passes" warning with the measured contrast ratios. §14 — added self-hosted fonts as an optional future optimisation.
 
 ---
 
