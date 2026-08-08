@@ -94,7 +94,18 @@ Four changes from this doc's first draft, all made in SPIKE-03 and validated by 
 
 **Deliberately not added: a `windowOrder: string[]` field.** The taskbar needs a stable tab order that doesn't reshuffle on every focus change, which at first looks like it needs an explicit order array. It doesn't: JavaScript guarantees non-integer-like string keys iterate in insertion order, the window IDs are app names and so never integer-like, and assigning to an existing key preserves its original position — so a drag or a focus change can't reorder the tabs. A parallel array would be a second source of truth that can desync from `windows`. See SPIKE-03's decision log.
 
-**Where it lives:** React Context + `useReducer` (`src/state/osReducer.ts` + `src/state/osContext.tsx`). No Redux/Zustand needed at this scope. Reducer actions: `OPEN_WINDOW`, `CLOSE_WINDOW`, `FOCUS_WINDOW`, `MOVE_WINDOW`, `RESIZE_WINDOW`, `MINIMIZE_WINDOW`, `TOGGLE_MAXIMIZE`, `SELECT_ICON`, `TOGGLE_START_MENU`, `LOAD_TRACK`, `PLAY_MUSIC`, `PAUSE_MUSIC`, `SET_VOLUME`, `TOGGLE_MUTE`, `MUSIC_GESTURE_RESOLVED`, `SET_REDUCED_MOTION`.
+**Where it lives:** React Context + `useReducer` (`src/state/osReducer.ts` + `src/state/osContext.tsx`). No Redux/Zustand needed at this scope. `useOS()` returns `{ state, dispatch }` and throws if called outside `OSProvider`. `OSProvider` accepts an `initial` state override, used by tests and by persistence on load (SPIKE-05).
+
+Reducer actions, as built in SPIKE-04: `OPEN_WINDOW`, `CLOSE_WINDOW`, `FOCUS_WINDOW`, `MOVE_WINDOW`, `RESIZE_WINDOW`, `MINIMIZE_WINDOW`, `RESTORE_WINDOW`, `TOGGLE_MAXIMIZE`, `SELECT_ICON`, `TOGGLE_START_MENU`, `CLOSE_START_MENU`, `SET_SHUTDOWN`, `LOAD_TRACK`, `MUSIC_ERROR`, `PLAY_MUSIC`, `PAUSE_MUSIC`, `SET_VOLUME`, `TOGGLE_MUTE`, `MUSIC_GESTURE_RESOLVED`, `SET_REDUCED_MOTION`.
+
+Four differ from this doc's original list:
+
+- **`RESTORE_WINDOW` added.** `MINIMIZE_WINDOW` is one-way, not a toggle — a minimized window isn't on screen, so its own title-bar button can never mean "restore". The taskbar tab is the only affordance that brings it back, and it has to both un-minimize *and* focus.
+- **`CLOSE_START_MENU` added** alongside `TOGGLE_START_MENU`. The menu closes on outside-click and on `Escape`; with only a toggle, a document-level click handler would flip it back *open* on the second event. `CLOSE_START_MENU` returns the identical state object when already closed, so a repeatedly-firing handler causes no re-renders.
+- **`SET_SHUTDOWN` added** to drive `shuttingDown`. Takes a boolean rather than being one-way, so Phase 3 can offer a way back out of the joke overlay without a type change; it also closes the Start Menu it was launched from.
+- **`MUSIC_ERROR` added.** `MusicState.lastError` needed a way to be set. Deliberately leaves `videoId` and `isPlaying` untouched — a mistyped URL must not stop the track that's already playing. `LOAD_TRACK` clears it on success.
+
+**`TOGGLE_MAXIMIZE` carries a `viewport: { width, height }` payload.** Maximized size depends on the window size, and the reducer stays pure — it never reads `window.innerWidth` itself. Same reasoning for why clamping a drag to the viewport lives in the drag hook (§5) rather than in `MOVE_WINDOW`.
 
 **Persistence (optional):** mirror `windows` and `music.videoId`/`music.volume` to `localStorage` (`src/state/persistence.ts`) so a returning visitor's layout and last-picked track survive a refresh. Not required for launch.
 
@@ -113,7 +124,13 @@ All typed (`src/types/content.ts` holds the shared interfaces). Editing the port
 
 Unchanged in behavior from the mockup, implemented with typed hooks:
 
-- **Bring-to-front:** any `mousedown`/`pointerdown` on a window dispatches `FOCUS_WINDOW`, which sets `zIndex = nextZIndex++`.
+Sizing constants (`MIN_WIDTH`/`MIN_HEIGHT` 280/200, `DEFAULT_WIDTH`/`DEFAULT_HEIGHT` 420/330) are exported from `src/state/osReducer.ts` so the reducer and the resize hook cannot disagree about the floor.
+
+- **Bring-to-front:** any `mousedown`/`pointerdown` on a window dispatches `FOCUS_WINDOW`, which sets `zIndex = nextZIndex++`. Re-focusing the already-focused window is a no-op that returns the identical state object, so holding the pointer down on the front window doesn't churn the counter or re-render.
+- **`WindowManager` must establish its own stacking context** — `position: relative` with `z-index: var(--z-windows)` — and individual `WindowState.zIndex` values apply *inside* it. This is a hard requirement, not a style preference. `nextZIndex` increments on every focus change and is unbounded by design; SPIKE-04 measured it passing 500 after a few hundred focus changes, which as a page-level `z-index` would put windows above the scanline overlay (50), the music widget (55), the taskbar (60), and the Start Menu (70). Scoping them to a stacking context makes the growth harmless — the alternative, renumbering every window on each focus change, is more code and more churn for the same result.
+- **New windows cascade.** Each additional window opens offset by 26px down-right (wrapping every 5) from the mockup's `250,90`. Without it, opening two apps stacks them exactly and looks broken; the mockup only ever shows one window so it never had to solve this.
+- **One window per app.** `OPEN_WINDOW` for an already-open app focuses and un-minimizes the existing window instead of creating a second (see §3).
+- **Focus never silently vanishes.** Closing or minimizing the focused window hands focus to the topmost remaining visible window, falling back to `null` only when nothing is left. Groundwork for SPIKE-28.
 - **Drag:** `src/hooks/useDraggable.ts` — captures pointer offset on title-bar `pointerdown`, updates `x`/`y` on `pointermove`, clamps so the title bar can't leave the viewport, ends on `pointerup`. Use the Pointer Events API (not separate mouse/touch handlers) so drag works on touch devices too.
 - **Resize:** `src/hooks/useResizable.ts` — same pattern from the corner handle, enforces `minWidth: 280, minHeight: 200`.
 - **Minimize:** `minimized: true`; window unmounts visually, taskbar tab remains.
@@ -141,7 +158,8 @@ Reuse exactly what's in the mockup:
 - Both families are also exposed as `--font-display` / `--font-body` in `tokens.css` so the literal font stack isn't repeated per component. The mockup's `.pixel` helper class is kept, since it's what the ported markup uses.
 - `global.css` keeps the mockup's `-webkit-font-smoothing: none` — that's what stops the pixel fonts being antialiased into mush, so it isn't incidental.
 - **Icons:** inline SVG, 10×10 unit viewBox, `shapeRendering="crispEdges"`, one flat color per icon.
-- **Layer stack (z-index, back to front):** `CityscapeBackground` (0) → `Starfield` (5) → desktop icons (10) → windows (20+, dynamic) → wordmark (40) → `ScanlineOverlay` (50) → `MusicPlayer` widget (55) → `Taskbar` (60) → `StartMenu` (70). These are the mockup's own values; the wordmark's 40 was implicit there and is written out here. All of them exist as `--z-*` custom properties in `tokens.css` — layering is a cross-component contract, so it shouldn't live as magic numbers spread across components.
+- **Layer stack (z-index, back to front):** `CityscapeBackground` (0) → `Starfield` (5) → desktop icons (10) → `WindowManager` (20) → wordmark (40) → `ScanlineOverlay` (50) → `MusicPlayer` widget (55) → `Taskbar` (60) → `StartMenu` (70). These are the mockup's own values; the wordmark's 40 was implicit there and is written out here. All of them exist as `--z-*` custom properties in `tokens.css` — layering is a cross-component contract, so it shouldn't live as magic numbers spread across components.
+- **Windows sit at 20 as a single layer, not "20+".** `WindowManager` owns z-index 20 and creates a stacking context; per-window `zIndex` values order windows *within* that layer only. The original "windows (20+, dynamic)" phrasing implied window z-indexes compete with the layers above them, which SPIKE-04 showed breaks after a few hundred focus changes — see §5.
 
 ## 7. Live background: neon cityscape
 

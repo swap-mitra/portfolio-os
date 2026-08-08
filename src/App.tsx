@@ -1,134 +1,81 @@
-/* SPIKE-02 token proof page — throwaway. Exists only to confirm the ported
-   palette and fonts render identically to portfolio-os-mockup.html. The real
-   Desktop replaces this in Phase 2/3. */
+/* Phase 1 scaffold. The token-proof page from SPIKE-02 has served its purpose;
+   this is a temporary state-inspector harness confirming OSProvider/useOS work
+   end to end. Both get replaced by the real Desktop in Phase 2/3. */
 
-const SWATCHES = [
-  ['--ink', '#0b0b16'],
-  ['--ink-2', '#14142a'],
-  ['--ink-3', '#1d1d3a'],
-  ['--paper', '#e8e6f0'],
-  ['--magenta', '#ff2e6b'],
-  ['--cyan', '#23f0ff'],
-  ['--yellow', '#ffe14d'],
-  ['--green', '#39ff88'],
-] as const
+import { OSProvider, useOS } from './state/osContext'
 
-function App() {
+function StateHarness() {
+  const { state, dispatch } = useOS()
+  const viewport = { width: window.innerWidth, height: window.innerHeight }
+
   return (
     <div style={{ padding: 20, height: '100%', overflowY: 'auto' }}>
       <div className="pixel" style={{ fontSize: 10, color: 'var(--cyan)', letterSpacing: 2 }}>
-        PORTFOLIO-OS — TOKEN PROOF
+        PORTFOLIO-OS — STATE HARNESS
       </div>
 
-      <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
-        {SWATCHES.map(([name, hex]) => (
-          <div key={name} style={{ textAlign: 'center' }}>
-            <div
-              style={{
-                width: 64,
-                height: 44,
-                background: `var(${name})`,
-                border: '1px solid var(--ink-3)',
-              }}
-            />
-            <div style={{ fontSize: 14, marginTop: 4 }}>{name}</div>
-            <div style={{ fontSize: 13, opacity: 0.7 }}>{hex}</div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 16 }}>
+        {(['about', 'projects', 'resume', 'contact', 'terminal'] as const).map((appType) => (
+          <button
+            key={appType}
+            className="pixel"
+            style={{
+              fontSize: 9,
+              padding: '8px 10px',
+              background: 'var(--ink-3)',
+              color: 'var(--paper)',
+              border: '1px solid var(--magenta)',
+              cursor: 'pointer',
+            }}
+            onClick={() => dispatch({ type: 'OPEN_WINDOW', appType })}
+          >
+            OPEN {appType.toUpperCase()}
+          </button>
+        ))}
+      </div>
+
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 10 }}>
+        {Object.values(state.windows).map((w) => (
+          <div key={w.id} style={{ display: 'flex', gap: 4 }}>
+            <span style={{ fontSize: 16, alignSelf: 'center' }}>{w.id}</span>
+            <button onClick={() => dispatch({ type: 'FOCUS_WINDOW', id: w.id })}>focus</button>
+            <button onClick={() => dispatch({ type: 'MINIMIZE_WINDOW', id: w.id })}>_</button>
+            <button onClick={() => dispatch({ type: 'TOGGLE_MAXIMIZE', id: w.id, viewport })}>
+              □
+            </button>
+            <button onClick={() => dispatch({ type: 'RESTORE_WINDOW', id: w.id })}>restore</button>
+            <button onClick={() => dispatch({ type: 'CLOSE_WINDOW', id: w.id })}>X</button>
           </div>
         ))}
       </div>
 
-      {/* Window chrome, mirroring the mockup's .win / .titlebar / .win-body */}
-      <div
-        style={{
-          marginTop: 24,
-          width: 420,
-          height: 200,
-          background: 'var(--ink-2)',
-          border: '2px solid var(--magenta)',
-          boxShadow:
-            '0 0 0 1px var(--ink), 0 8px 24px rgba(0,0,0,.6), 0 0 14px rgba(255,46,107,.35)',
-          display: 'flex',
-          flexDirection: 'column',
-        }}
+      <pre
+        id="state-dump"
+        style={{ fontSize: 14, marginTop: 16, color: 'var(--green)', fontFamily: 'inherit' }}
       >
-        <div
-          className="pixel"
-          style={{
-            background: 'var(--magenta)',
-            color: 'var(--ink)',
-            padding: '6px 8px',
-            fontSize: 10,
-            letterSpacing: '.5px',
-            display: 'flex',
-            justifyContent: 'space-between',
-          }}
-        >
-          <span>PROJECTS — EXPLORER.EXE</span>
-          <span>_ □ X</span>
-        </div>
-        <div style={{ flex: 1, padding: '14px 16px', fontSize: 18 }}>
-          <div
-            className="pixel"
-            style={{ fontSize: 11, color: 'var(--cyan)', marginBottom: 4 }}
-          >
-            NEON_RUNNER
-          </div>
-          <div style={{ opacity: 0.85, fontSize: 16, lineHeight: 1.3 }}>
-            Retro-styled endless runner, built with vanilla JS + canvas. Body copy is VT323 at
-            16-18px; this line exists to check the font actually loaded rather than falling back
-            to a generic monospace.
-          </div>
-        </div>
-      </div>
-
-      {/* Taskbar chrome, mirroring the mockup's #taskbar */}
-      <div
-        style={{
-          marginTop: 24,
-          height: 44,
-          width: 420,
-          background: 'var(--ink-2)',
-          borderTop: '2px solid var(--cyan)',
-          boxShadow: '0 0 10px rgba(35,240,255,.35)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 10,
-          padding: '0 10px',
-        }}
-      >
-        <button
-          className="pixel"
-          style={{
-            fontSize: 10,
-            color: 'var(--ink)',
-            background: 'var(--yellow)',
-            border: 'none',
-            padding: '9px 12px',
-            cursor: 'pointer',
-          }}
-        >
-          ▸ START
-        </button>
-        <div
-          className="pixel"
-          style={{
-            fontSize: 9,
-            color: 'var(--ink)',
-            background: 'var(--magenta)',
-            border: '1px solid var(--magenta)',
-            padding: '8px 10px',
-          }}
-        >
-          PROJECTS_EXPLORER.EXE
-        </div>
-        <div
-          className="pixel"
-          style={{ marginLeft: 'auto', fontSize: 11, color: 'var(--green)' }}
-        >
-          00:00:00
-        </div>
-      </div>
+        {JSON.stringify(
+          {
+            windowIds: Object.keys(state.windows),
+            focusedWindowId: state.focusedWindowId,
+            zIndexes: Object.values(state.windows).map((w) => `${w.id}:${w.zIndex}`),
+            minimized: Object.values(state.windows)
+              .filter((w) => w.minimized)
+              .map((w) => w.id),
+            nextZIndex: state.nextZIndex,
+          },
+          null,
+          2,
+        )}
+      </pre>
     </div>
+  )
+}
+
+function App() {
+  return (
+    <OSProvider>
+      <StateHarness />
+    </OSProvider>
   )
 }
 
