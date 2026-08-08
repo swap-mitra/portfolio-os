@@ -49,6 +49,17 @@ function StateHarness() {
         ))}
       </div>
 
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 12 }}>
+        <button onClick={() => dispatch({ type: 'LOAD_TRACK', videoId: 'aAkMkVFwAoo' })}>
+          load track
+        </button>
+        <button onClick={() => dispatch({ type: 'SET_VOLUME', volume: 23 })}>volume 23</button>
+        <button onClick={() => dispatch({ type: 'TOGGLE_MUTE' })}>mute</button>
+        <button onClick={() => dispatch({ type: 'OPEN_WINDOW', appType: 'about' })}>
+          open about
+        </button>
+      </div>
+
       <pre
         id="state-dump"
         style={{ fontSize: 14, marginTop: 16, color: 'var(--green)', fontFamily: 'inherit' }}
@@ -62,6 +73,14 @@ function StateHarness() {
               .filter((w) => w.minimized)
               .map((w) => w.id),
             nextZIndex: state.nextZIndex,
+            music: {
+              videoId: state.music.videoId,
+              isDefaultTrack: state.music.isDefaultTrack,
+              volume: state.music.volume,
+              isMuted: state.music.isMuted,
+              isPlaying: state.music.isPlaying,
+              awaitingUserGesture: state.music.awaitingUserGesture,
+            },
           },
           null,
           2,
