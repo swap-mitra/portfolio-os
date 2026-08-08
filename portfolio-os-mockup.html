@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PORTFOLIO-OS — desktop mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0b0b16;
+    --ink-2:#14142a;
+    --ink-3:#1d1d3a;
+    --paper:#e8e6f0;
+    --magenta:#ff2e6b;
+    --cyan:#23f0ff;
+    --yellow:#ffe14d;
+    --green:#39ff88;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0;padding:0;height:100%;
+    background:var(--ink);
+    color:var(--paper);
+    font-family:'VT323',monospace;
+    overflow:hidden;
+    -webkit-font-smoothing:none;
+  }
+  .pixel{font-family:'Press Start 2P',monospace;}
+
+  #desktop{
+    position:relative;
+    width:100%;
+    height:100vh;
+    overflow:hidden;
+    background:
+      radial-gradient(ellipse at 50% 30%, #12122a 0%, var(--ink) 70%);
+  }
+
+  /* faint starfield */
+  .star{
+    position:absolute;
+    width:2px;height:2px;
+    background:var(--paper);
+    opacity:.5;
+    animation:twinkle 3.5s ease-in-out infinite;
+  }
+  @keyframes twinkle{0%,100%{opacity:.15}50%{opacity:.8}}
+
+  /* scanline overlay */
+  #scanlines{
+    position:absolute;inset:0;
+    pointer-events:none;
+    background:repeating-linear-gradient(
+      to bottom,
+      rgba(0,0,0,.22) 0px,
+      rgba(0,0,0,.22) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+    mix-blend-mode:multiply;
+    animation:flicker 7s ease-in-out infinite;
+    z-index:50;
+  }
+  @keyframes flicker{0%,96%,100%{opacity:1}97%{opacity:.85}98%{opacity:1}}
+
+  #wordmark{
+    position:absolute;
+    top:14px;right:20px;
+    font-size:10px;
+    letter-spacing:2px;
+    color:var(--cyan);
+    opacity:.55;
+    z-index:40;
+  }
+
+  /* desktop icons */
+  #icons{
+    position:absolute;
+    top:24px;left:20px;
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+    z-index:10;
+  }
+  .icon{
+    width:74px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:6px;
+    cursor:pointer;
+    user-select:none;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .icon svg{
+    width:34px;height:34px;
+    image-rendering:pixelated;
+    filter:drop-shadow(0 0 3px currentColor);
+  }
+  .icon span{
+    font-size:9px;
+    line-height:1.4;
+    text-align:center;
+    color:var(--paper);
+    padding:2px 4px;
+    letter-spacing:.5px;
+  }
+  .icon.selected span{
+    background:var(--cyan);
+    color:var(--ink);
+  }
+  .icon:focus-visible{outline:2px solid var(--cyan);outline-offset:3px;}
+
+  /* window */
+  .win{
+    position:absolute;
+    top:90px;left:250px;
+    width:420px;
+    min-width:280px;
+    min-height:200px;
+    height:330px;
+    background:var(--ink-2);
+    border:2px solid var(--magenta);
+    box-shadow:0 0 0 1px var(--ink), 0 8px 24px rgba(0,0,0,.6), 0 0 14px rgba(255,46,107,.35);
+    display:flex;
+    flex-direction:column;
+    z-index:20;
+  }
+  .win.hidden{display:none;}
+  .titlebar{
+    background:var(--magenta);
+    color:var(--ink);
+    padding:6px 8px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    cursor:grab;
+    font-size:10px;
+    letter-spacing:.5px;
+  }
+  .titlebar:active{cursor:grabbing;}
+  .win-btns{display:flex;gap:5px;}
+  .win-btns button{
+    width:16px;height:16px;
+    background:var(--ink);
+    color:var(--paper);
+    border:1px solid var(--ink);
+    font-family:'Press Start 2P',monospace;
+    font-size:7px;
+    line-height:1;
+    cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    padding:0;
+  }
+  .win-btns button:hover{background:var(--ink-3);}
+  .win-body{
+    flex:1;
+    overflow-y:auto;
+    padding:14px 16px;
+    font-size:18px;
+  }
+  .proj-row{
+    display:flex;
+    gap:10px;
+    align-items:flex-start;
+    padding:8px 0;
+    border-bottom:1px solid var(--ink-3);
+  }
+  .proj-row:last-child{border-bottom:none;}
+  .proj-row svg{width:22px;height:22px;flex-shrink:0;margin-top:2px;image-rendering:pixelated;}
+  .proj-title{
+    font-family:'Press Start 2P',monospace;
+    font-size:11px;
+    color:var(--cyan);
+    margin-bottom:4px;
+  }
+  .proj-desc{color:var(--paper);opacity:.85;font-size:16px;line-height:1.3;}
+  .resize-handle{
+    position:absolute;
+    right:2px;bottom:2px;
+    width:14px;height:14px;
+    cursor:nwse-resize;
+  }
+  .resize-handle svg{width:100%;height:100%;}
+
+  /* taskbar */
+  #taskbar{
+    position:absolute;
+    left:0;right:0;bottom:0;
+    height:44px;
+    background:var(--ink-2);
+    border-top:2px solid var(--cyan);
+    box-shadow:0 0 10px rgba(35,240,255,.35);
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:0 10px;
+    z-index:60;
+  }
+  #start-btn{
+    font-family:'Press Start 2P',monospace;
+    font-size:10px;
+    color:var(--ink);
+    background:var(--yellow);
+    border:none;
+    padding:9px 12px;
+    cursor:pointer;
+    animation:pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.65}}
+  #start-btn:hover{opacity:1;filter:brightness(1.1);}
+
+  #start-menu{
+    position:absolute;
+    bottom:52px;left:10px;
+    background:var(--ink-2);
+    border:2px solid var(--yellow);
+    padding:6px;
+    display:none;
+    flex-direction:column;
+    min-width:170px;
+    z-index:70;
+  }
+  #start-menu.open{display:flex;}
+  #start-menu button{
+    background:none;
+    border:none;
+    color:var(--paper);
+    font-family:'VT323',monospace;
+    font-size:17px;
+    text-align:left;
+    padding:7px 8px;
+    cursor:pointer;
+  }
+  #start-menu button:hover{background:var(--ink-3);color:var(--cyan);}
+
+  .taskbar-tab{
+    font-family:'Press Start 2P',monospace;
+    font-size:9px;
+    color:var(--paper);
+    background:var(--ink-3);
+    border:1px solid var(--magenta);
+    padding:8px 10px;
+    cursor:pointer;
+    display:none;
+  }
+  .taskbar-tab.active{display:block;color:var(--ink);background:var(--magenta);}
+
+  #clock{
+    margin-left:auto;
+    font-family:'Press Start 2P',monospace;
+    font-size:11px;
+    color:var(--green);
+  }
+
+  @media (max-width:640px){
+    #icons{gap:14px;}
+    .win{left:16px;top:80px;width:calc(100% - 32px);}
+  }
+</style>
+</head>
+<body>
+
+<div id="desktop">
+  <div id="scanlines"></div>
+  <div id="wordmark" class="pixel">PORTFOLIO-OS</div>
+
+  <div id="icons">
+    <div class="icon" tabindex="0" data-app="about">
+      <svg viewBox="0 0 10 10" shape-rendering="crispEdges">
+        <rect x="2" y="1" width="6" height="8" fill="var(--paper)"/>
+        <rect x="6" y="1" width="2" height="2" fill="var(--ink)"/>
+        <rect x="3" y="4" width="4" height="0.7" fill="var(--magenta)"/>
+        <rect x="3" y="5.4" width="4" height="0.7" fill="var(--magenta)"/>
+        <rect x="3" y="6.8" width="2.5" height="0.7" fill="var(--magenta)"/>
+      </svg>
+      <span>ABOUT_ME.TXT</span>
+    </div>
+
+    <div class="icon" tabindex="0" data-app="projects">
+      <svg viewBox="0 0 10 10" shape-rendering="crispEdges">
+        <rect x="1" y="2" width="4" height="1" fill="var(--cyan)"/>
+        <rect x="1" y="3" width="8" height="5" fill="var(--cyan)"/>
+      </svg>
+      <span>PROJECTS</span>
+    </div>
+
+    <div class="icon" tabindex="0" data-app="resume">
+      <svg viewBox="0 0 10 10" shape-rendering="crispEdges">
+        <rect x="1" y="1" width="8" height="8" fill="var(--yellow)"/>
+        <rect x="3" y="1" width="3" height="2" fill="var(--ink)"/>
+        <rect x="2.5" y="5" width="5" height="3" fill="var(--ink)"/>
+      </svg>
+      <span>RESUME.PDF</span>
+    </div>
+
+    <div class="icon" tabindex="0" data-app="contact">
+      <svg viewBox="0 0 10 10" shape-rendering="crispEdges">
+        <rect x="1" y="2" width="8" height="6" fill="var(--green)"/>
+        <rect x="1" y="3.6" width="8" height="0.6" fill="var(--ink)"/>
+        <rect x="4.5" y="4.6" width="1" height="1" fill="var(--ink)"/>
+      </svg>
+      <span>CONTACT.EXE</span>
+    </div>
+
+    <div class="icon" tabindex="0" data-app="terminal">
+      <svg viewBox="0 0 10 10" shape-rendering="crispEdges">
+        <rect x="1" y="1" width="8" height="8" fill="var(--cyan)"/>
+        <rect x="2" y="2" width="6" height="6" fill="var(--ink)"/>
+        <rect x="3" y="6" width="1" height="1" fill="var(--green)"/>
+        <rect x="4.5" y="6" width="1" height="1" fill="var(--green)"/>
+      </svg>
+      <span>TERMINAL.EXE</span>
+    </div>
+  </div>
+
+  <div class="win" id="win-projects">
+    <div class="titlebar pixel" id="win-titlebar">
+      <span>PROJECTS — EXPLORER.EXE</span>
+      <div class="win-btns">
+        <button aria-label="minimize" data-action="min">_</button>
+        <button aria-label="maximize" data-action="max">□</button>
+        <button aria-label="close" data-action="close">X</button>
+      </div>
+    </div>
+    <div class="win-body">
+      <div class="proj-row">
+        <svg viewBox="0 0 10 10" shape-rendering="crispEdges"><rect x="1" y="2" width="4" height="1" fill="var(--cyan)"/><rect x="1" y="3" width="8" height="5" fill="var(--cyan)"/></svg>
+        <div>
+          <div class="proj-title">NEON_RUNNER</div>
+          <div class="proj-desc">Retro-styled endless runner, built with vanilla JS + canvas.</div>
+        </div>
+      </div>
+      <div class="proj-row">
+        <svg viewBox="0 0 10 10" shape-rendering="crispEdges"><rect x="1" y="2" width="4" height="1" fill="var(--cyan)"/><rect x="1" y="3" width="8" height="5" fill="var(--cyan)"/></svg>
+        <div>
+          <div class="proj-title">PIXEL_CMS</div>
+          <div class="proj-desc">Headless CMS with a pixel-art admin dashboard.</div>
+        </div>
+      </div>
+      <div class="proj-row">
+        <svg viewBox="0 0 10 10" shape-rendering="crispEdges"><rect x="1" y="2" width="4" height="1" fill="var(--cyan)"/><rect x="1" y="3" width="8" height="5" fill="var(--cyan)"/></svg>
+        <div>
+          <div class="proj-title">SYNTH_API</div>
+          <div class="proj-desc">REST API that generates chiptune audio on demand.</div>
+        </div>
+      </div>
+    </div>
+    <div class="resize-handle" id="resize-handle">
+      <svg viewBox="0 0 10 10" shape-rendering="crispEdges">
+        <rect x="7" y="1" width="2" height="2" fill="var(--cyan)"/>
+        <rect x="4" y="4" width="2" height="2" fill="var(--cyan)"/>
+        <rect x="7" y="4" width="2" height="2" fill="var(--cyan)"/>
+        <rect x="1" y="7" width="2" height="2" fill="var(--cyan)"/>
+        <rect x="4" y="7" width="2" height="2" fill="var(--cyan)"/>
+        <rect x="7" y="7" width="2" height="2" fill="var(--cyan)"/>
+      </svg>
+    </div>
+  </div>
+
+  <div id="start-menu" class="pixel">
+    <button data-action="open-projects">▸ PROGRAMS</button>
+    <button data-action="open-projects">▸ DOCUMENTS</button>
+    <button data-action="shutdown">▸ SHUT DOWN…</button>
+  </div>
+
+  <div id="taskbar">
+    <button id="start-btn">▸ START</button>
+    <div class="taskbar-tab active pixel" id="tab-projects" data-app="projects">PROJECTS_EXPLORER.EXE</div>
+    <div id="clock" class="pixel">00:00:00</div>
+  </div>
+</div>
+
+<script>
+  // starfield
+  const desktop = document.getElementById('desktop');
+  for(let i=0;i<40;i++){
+    const s=document.createElement('div');
+    s.className='star';
+    s.style.top=Math.random()*90+'%';
+    s.style.left=Math.random()*100+'%';
+    s.style.animationDelay=(Math.random()*3.5)+'s';
+    desktop.appendChild(s);
+  }
+
+  // clock
+  function tick(){
+    const d=new Date();
+    const p=n=>String(n).padStart(2,'0');
+    document.getElementById('clock').textContent=`${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+  }
+  tick();setInterval(tick,1000);
+
+  // icon selection
+  document.querySelectorAll('.icon').forEach(icon=>{
+    icon.addEventListener('click',e=>{
+      document.querySelectorAll('.icon').forEach(i=>i.classList.remove('selected'));
+      icon.classList.add('selected');
+      if(icon.dataset.app==='projects'){
+        openWindow();
+      }
+    });
+  });
+  desktop.addEventListener('click',e=>{
+    if(!e.target.closest('.icon')){
+      document.querySelectorAll('.icon').forEach(i=>i.classList.remove('selected'));
+    }
+  });
+
+  // window open/close/minimize
+  const win=document.getElementById('win-projects');
+  const tab=document.getElementById('tab-projects');
+  function openWindow(){
+    win.classList.remove('hidden');
+    tab.classList.add('active');
+  }
+  function closeWindow(){
+    win.classList.add('hidden');
+    tab.classList.remove('active');
+  }
+  document.querySelectorAll('.win-btns button').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const action=btn.dataset.action;
+      if(action==='close')closeWindow();
+      if(action==='min')win.classList.add('hidden');
+      if(action==='max'){
+        win.style.width='min(680px, calc(100% - 40px))';
+        win.style.height='min(460px, calc(100% - 120px))';
+      }
+    });
+  });
+  tab.addEventListener('click',()=>{
+    win.classList.remove('hidden');
+  });
+
+  // start menu
+  const startBtn=document.getElementById('start-btn');
+  const startMenu=document.getElementById('start-menu');
+  startBtn.addEventListener('click',e=>{
+    e.stopPropagation();
+    startMenu.classList.toggle('open');
+  });
+  document.addEventListener('click',()=>startMenu.classList.remove('open'));
+  startMenu.querySelectorAll('button').forEach(b=>{
+    b.addEventListener('click',e=>{
+      e.stopPropagation();
+      if(b.dataset.action==='open-projects'){openWindow();}
+      startMenu.classList.remove('open');
+    });
+  });
+
+  // drag
+  const titlebar=document.getElementById('win-titlebar');
+  let dragging=false,offX=0,offY=0;
+  titlebar.addEventListener('mousedown',e=>{
+    dragging=true;
+    const r=win.getBoundingClientRect();
+    offX=e.clientX-r.left;offY=e.clientY-r.top;
+  });
+  window.addEventListener('mousemove',e=>{
+    if(dragging){
+      win.style.left=(e.clientX-offX)+'px';
+      win.style.top=Math.max(0,e.clientY-offY)+'px';
+    }
+    if(resizing){
+      const r=win.getBoundingClientRect();
+      win.style.width=Math.max(280,e.clientX-r.left)+'px';
+      win.style.height=Math.max(200,e.clientY-r.top)+'px';
+    }
+  });
+  window.addEventListener('mouseup',()=>{dragging=false;resizing=false;});
+
+  // resize
+  let resizing=false;
+  document.getElementById('resize-handle').addEventListener('mousedown',e=>{
+    e.stopPropagation();
+    resizing=true;
+  });
+</script>
+</body>
+</html>
