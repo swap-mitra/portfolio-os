@@ -1,0 +1,36 @@
+/* Base reset and root element styles — ported from portfolio-os-mockup.html's
+   `*` and `html,body` rules. Anything decorative lives in crt-effects.css;
+   this file is only the reset plus the page's ground colour and type. */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-body);
+  overflow: hidden;
+  -webkit-font-smoothing: none;
+}
+
+#root {
+  height: 100%;
+}
+
+/* The mockup applies this as a class to every element using the display font. */
+.pixel {
+  font-family: var(--font-display);
+}
+
+/* Neon-on-dark makes the browser default focus ring hard to see, so the
+   mockup defines its own. Same treatment applied globally rather than
+   per-component (architecture.md §10, SPIKE-28). */
+:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 3px;
+}
