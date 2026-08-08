@@ -248,24 +248,33 @@ src/
     responsive.css
 public/
   resume.pdf
-tsconfig.json
+tsconfig.json         (solution file — references the two below, holds no compiler options)
+tsconfig.app.json     (compiles src/ — this is where the strictness flags live)
+tsconfig.node.json    (compiles vite.config.ts)
 vite.config.ts
 package.json
+.oxlintrc.json
 vercel.json           (only if a custom config is actually needed — see §12)
 ```
+
+Two notes from the SPIKE-00 scaffold that this list originally didn't anticipate:
+- **The TypeScript config is split three ways**, which is what `create-vite` now produces. The root `tsconfig.json` is a solution file (`"files": []` plus project references) — compiler options placed there apply to nothing. `strict`, `noUncheckedIndexedAccess`, `noUnusedLocals`, and `noUnusedParameters` are set in `tsconfig.app.json` and `tsconfig.node.json`. The template ships *without* `strict`; it was added explicitly.
+- `src/styles/global.css` also exists alongside the three stylesheets listed above (SPIKE-02 names it, this tree omitted it).
 
 ## 12. Deployment (Vercel via CI/CD)
 
 Deployment runs entirely through a GitHub Actions pipeline (`.github/workflows/deploy.yml`) — nobody, human or agent, runs `vercel deploy` from a local/agent shell as part of normal work. The only manual, one-time step is creating the Vercel project itself (see below); everything after that is automatic on every push/PR.
 
 - **Pipeline jobs:**
-  - `build` — runs on every push and PR: install, `tsc --noEmit` (type-check), `eslint .` (lint), `vite build`. Fails the whole pipeline if any step fails — nothing gets attempted to deploy on a broken build.
+  - `build` — runs on every push and PR: install, type-check, lint, `vite build`. Fails the whole pipeline if any step fails — nothing gets attempted to deploy on a broken build.
   - `deploy-preview` — runs only on pull requests: builds and deploys to a Vercel preview environment, then comments the resulting URL on the PR. This is what you use to review the cityscape/music features on an actual mobile device before merging, not just desktop.
   - `deploy-production` — runs only on pushes to `main`: same pattern, deployed with `--prod`.
 - **One-time manual setup (cannot be automated by an agent):** the repo owner runs `vercel link` from their own machine (interactive login required) to create the Vercel project, then adds `VERCEL_TOKEN`, `VERCEL_ORG_ID`, and `VERCEL_PROJECT_ID` as GitHub Actions repository secrets. Until this is done, the `build` job still runs and catches type/lint/build errors — only the two deploy jobs are blocked.
+- **Type-check command:** `npm run type-check` → **`tsc -b`**, not `tsc --noEmit`. With the split tsconfig (§11), `tsc --noEmit` at the repo root checks *zero* files — verified in SPIKE-00 with `tsc --noEmit --listFiles`, which listed nothing. `tsc -b` builds both referenced projects, and because both set `noEmit: true` it type-checks without emitting.
+- **Lint command:** `npm run lint` → **`oxlint`** (configured by `.oxlintrc.json`), not `eslint .`. This is what `create-vite` scaffolds as of Vite 8; it was kept rather than replaced with `typescript-eslint`. SPIKE-31 should revisit only if a genuinely type-aware lint rule is needed.
 - **Build command (inside the pipeline):** `npm run build`, which runs `tsc -b && vite build` — type-check before bundling.
 - **Output directory:** `dist`.
-- **Node version:** pinned in the workflow's `setup-node` step (Node 20) and mirrored via `"engines": { "node": ">=20" }` in `package.json` so local dev matches CI.
+- **Node version:** pinned in the workflow's `setup-node` step (Node 20) and mirrored in `package.json` as `"engines": { "node": "^20.19.0 || >=22.12.0" }` — copied from Vite 8's and oxlint's own declared ranges. The original `>=20` here was too loose: Vite 8 will not run on Node 20.0–20.18. `node-version: 20` in the workflow resolves to the latest 20.x, which clears the floor.
 - **Environment variables at runtime:** none required in the built app itself — everything is static/client-side, including the YouTube integration (no API key needed for the IFrame Player API). The `VERCEL_*` secrets are deploy-time only, used by the Actions runner, and never bundled into the shipped site.
 - **Only add a custom `vercel.json`** if you need something the default `vercel build` doesn't infer automatically (e.g. custom cache headers for `public/resume.pdf`, or SPA rewrite rules if client-side routing is ever added — not needed for the current single-page, no-router design).
 
