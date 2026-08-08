@@ -1,32 +1,79 @@
-# React + TypeScript + Vite
+# Portfolio-OS
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+A personal portfolio presented as a fictional retro desktop operating system — neon-on-black
+arcade styling, draggable windows, an animated cityscape background, and background music.
 
-Currently, two official plugins are available:
+Static single-page app: React + Vite + TypeScript, no backend, no database.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- `project-spec.md` — what's being built and why (functional spec)
+- `architecture.md` — technical architecture, state model, file structure
+- `spikes.md` — the spike-driven build plan, with a decision log per spike
+- `portfolio-os-mockup.html` — approved visual/interaction reference; open it in a browser
 
-## React Compiler
+## Local development
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Requires Node `^20.19.0 || >=22.12.0` (Vite 8's floor — Node 20.0–20.18 will not work).
 
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+npm install
+npm run dev        # dev server at http://localhost:5173
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+| Script | What it does |
+|---|---|
+| `npm run dev` | Vite dev server with HMR |
+| `npm run build` | `tsc -b && vite build` → static output in `dist/` |
+| `npm run type-check` | `tsc -b` — type-checks `src/` and `vite.config.ts` |
+| `npm run lint` | `oxlint` |
+| `npm run preview` | Serve the production build locally |
+
+**Note on `type-check`:** it runs `tsc -b`, not `tsc --noEmit`. The TypeScript config is split
+into a root solution file plus `tsconfig.app.json` / `tsconfig.node.json`; `tsc --noEmit` at the
+root type-checks *zero* files, so it would pass unconditionally. Both referenced configs set
+`noEmit: true`, so `tsc -b` checks types without writing output.
+
+## Deployment (Vercel via GitHub Actions)
+
+Deploys run **only** through `.github/workflows/deploy.yml`. Nobody — human or agent — runs
+`vercel deploy` from a local shell as part of normal work.
+
+| Trigger | Jobs that run | Result |
+|---|---|---|
+| Any push or PR to `main` | `build` | Type-check, lint, and production build must all pass |
+| Pull request to `main` | `build` → `deploy-preview` | Vercel preview deploy; the URL is posted as a PR comment |
+| Push to `main` | `build` → `deploy-production` | Vercel production deploy (`--prod`) |
+
+`build` is the gate: both deploy jobs `needs: build`, so a type error or lint failure means
+nothing is deployed.
+
+### One-time setup (repo owner only — cannot be automated)
+
+The two deploy jobs need three GitHub Actions repository secrets. **They are not set yet, so
+preview and production deploys currently do not run.** The `build` job does not depend on them
+and works regardless.
+
+To enable deploys:
+
+1. From your own machine, in this repo: `npx vercel link` — this requires an interactive
+   Vercel login, which is why it can't be scripted. It creates the Vercel project and writes
+   `.vercel/project.json` containing `orgId` and `projectId`.
+2. Create a token at <https://vercel.com/account/tokens>.
+3. Add all three under **repo → Settings → Secrets and variables → Actions**:
+
+   | Secret | Where it comes from |
+   |---|---|
+   | `VERCEL_TOKEN` | vercel.com/account/tokens |
+   | `VERCEL_ORG_ID` | `orgId` in `.vercel/project.json` (or Vercel project → Settings → General) |
+   | `VERCEL_PROJECT_ID` | `projectId` in the same place |
+
+4. Verify end to end: open a throwaway PR and confirm `deploy-preview` comments a working
+   preview URL, then merge it and confirm the production URL updates. Open both URLs — a green
+   check on the Action is not proof the site works.
+
+`.vercel/` is gitignored. No Vercel credentials belong in the repo or in `.env.local` — they are
+deploy-time only, used by the Actions runner, and never bundled into the shipped site.
+
+### Runtime environment variables
+
+None. The app is fully static and client-side, including the YouTube IFrame Player API
+integration, which needs no API key.
