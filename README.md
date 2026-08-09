@@ -5,10 +5,29 @@ arcade styling, draggable windows, an animated cityscape background, and backgro
 
 Static single-page app: React + Vite + TypeScript, no backend, no database.
 
-- `project-spec.md` — what's being built and why (functional spec)
-- `architecture.md` — technical architecture, state model, file structure
-- `spikes.md` — the spike-driven build plan, with a decision log per spike
-- `portfolio-os-mockup.html` — approved visual/interaction reference; open it in a browser
+Planning docs live in `specs/` (gitignored — local reference only, not part of the shipped app):
+
+- `specs/project-spec.md` — what's being built and why (functional spec)
+- `specs/architecture.md` — technical architecture, state model, file structure
+- `specs/spikes.md` — the spike-driven build plan, with a decision log per spike
+- `specs/portfolio-os-mockup.html` — approved visual/interaction reference; open it in a browser
+
+## Progress
+
+| Phase | Status |
+|---|---|
+| 0 — Foundations (scaffold, CI/CD, design tokens) | Done |
+| 1 — Core OS state & types | Done |
+| 2 — Window manager (drag, resize, focus/z-index, minimize/maximize/close, taskbar sync) | Done |
+| 3 — Desktop shell (icons, Start Menu, taskbar chrome, boot screen) | Not started |
+| 4 — Live background | Not started |
+| 5 — Music player | Not started |
+| 6 — Apps (About/Projects/Resume/Contact/Terminal) | Not started |
+| 7 — Accessibility | Not started |
+| 8 — Quality & release | Not started |
+
+`src/App.tsx` is currently a Phase 2 debug harness (open windows, inspect state) — it gets
+replaced by the real `Desktop` in Phase 3.
 
 ## Local development
 
