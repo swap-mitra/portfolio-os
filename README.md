@@ -35,7 +35,7 @@ Requires Node `^20.19.0 || >=22.12.0` (Vite 8's floor — Node 20.0–20.18 will
 
 ```bash
 npm install
-npm run dev        # dev server at http://localhost:5173
+npm run dev        # dev server at http://localhost:5999
 ```
 
 | Script | What it does |
