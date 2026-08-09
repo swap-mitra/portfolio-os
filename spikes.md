@@ -128,6 +128,12 @@ Work through spikes roughly in phase order — later phases assume earlier ones 
        if: github.event_name == 'pull_request'
        needs: build
        runs-on: ubuntu-latest
+       # Required: the repo default for GITHUB_TOKEN is read-only, so the
+       # github-script step below cannot comment without it. Naming any
+       # permission zeroes the rest, hence contents: read explicitly.
+       permissions:
+         contents: read
+         pull-requests: write
        env:
          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
@@ -137,10 +143,10 @@ Work through spikes roughly in phase order — later phases assume earlier ones 
            with:
              node-version: 20
          - run: npm ci
-         - run: npx vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
-         - run: npx vercel build --token=${{ secrets.VERCEL_TOKEN }}
+         - run: npx vercel@58 pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+         - run: npx vercel@58 build --token=${{ secrets.VERCEL_TOKEN }}
          - id: deploy
-           run: echo "url=$(npx vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})" >> "$GITHUB_OUTPUT"
+           run: echo "url=$(npx vercel@58 deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})" >> "$GITHUB_OUTPUT"
          - uses: actions/github-script@v7
            with:
              script: |
@@ -164,9 +170,9 @@ Work through spikes roughly in phase order — later phases assume earlier ones 
            with:
              node-version: 20
          - run: npm ci
-         - run: npx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-         - run: npx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
-         - run: npx vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+         - run: npx vercel@58 pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+         - run: npx vercel@58 build --prod --token=${{ secrets.VERCEL_TOKEN }}
+         - run: npx vercel@58 deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
    ```
 
 4. Add `"type-check": "tsc --noEmit"` and `"lint": "eslint ."` to `package.json` if SPIKE-31 hasn't already (pull that forward here since this pipeline depends on both scripts existing — note the dependency in SPIKE-31's own entry too).
@@ -184,6 +190,17 @@ Work through spikes roughly in phase order — later phases assume earlier ones 
   - **Deliberately did NOT add an `if: secrets.VERCEL_TOKEN != ''` guard** to make the deploy jobs skip cleanly while credentials are missing. That would turn `main` green and make the missing setup easy to forget — the instruction for this spike was explicitly not to skip or fake the pipeline. Consequence to be aware of: **every push to `main` will show a red X until the three secrets are added.** The red X is the reminder. Once secrets exist it goes green with no workflow edit needed.
   - No local `vercel` command was run, no `vercel deploy`, no `.vercel/` directory created. `.vercel` was added to `.gitignore` so that when the owner does run `vercel link`, the resulting `project.json` (which contains org/project IDs) can't be committed by accident.
   - **`type-check` and `lint` scripts:** step 4 asked for `"type-check": "tsc --noEmit"` and `"lint": "eslint ."`. Shipped as **`tsc -b`** and **`oxlint`** instead — see SPIKE-00's notes for why (`tsc --noEmit` checks zero files here; oxlint is what the template scaffolds). The pipeline YAML itself is unchanged because it calls the npm scripts rather than the tools directly, which is what makes this substitution invisible to the workflow.
+  - **Second blocker found after the first run, and it is not about secrets at all.** `deploy-preview`'s last step comments the preview URL via `actions/github-script`, which calls `issues.createComment`. The repo's default `GITHUB_TOKEN` permission is **read-only** (`gh api repos/.../actions/permissions/workflow` → `default_workflow_permissions: "read"`) and the workflow declared no `permissions:` block, so that call would have returned *403 Resource not accessible by integration*. The failure mode is nasty: the preview would deploy **successfully** and then the job would go red on the final step, which reads like a broken deploy but isn't. Fixed by adding a job-scoped block to `deploy-preview` only:
+    ```yaml
+    permissions:
+      contents: read
+      pull-requests: write
+    ```
+    Job-scoped rather than flipping the repo-wide setting to read/write: least privilege, and it's version-controlled instead of being a setting someone has to remember. `contents: read` has to be listed explicitly because naming any permission resets all the others to `none`. `deploy-production` needs no block — it only talks to Vercel.
+  - **Pinned the Vercel CLI to `npx vercel@58`** (latest at the time: 58.9.0) in all six invocations. Unpinned `npx vercel` would silently jump a major version mid-project and break deploys with no repo change to blame. Pinned the major rather than the exact patch, so bugfixes still arrive but a breaking major can't.
+  - **Checked whether unpinned `npx` needs `--yes` in CI, and it does not.** `npx <pkg>` prompts before installing a missing package only on a TTY; with stdin not a TTY it auto-installs and exits 0 (verified locally by running a package that wasn't installed). So the original `npx vercel` would have worked — the pin is for reproducibility, not to fix a hang.
+  - **Kept `spikes.md`'s embedded YAML and the real `.github/workflows/deploy.yml` in sync**, since `architecture.md` §12 designates this document as the source of truth for the job definitions. Verified by parsing both and diffing them ignoring comments — identical.
+  - **Unverifiable without a Vercel account, flagged for the first real deploy:** `package.json` now declares `"engines": { "node": "^20.19.0 || >=22.12.0" }` (SPIKE-00, to match Vite 8's actual floor). Vercel's docs describe simple forms like `22.x`, and it's unconfirmed that it parses a compound `||` range — an unsupported value fails the build with "Invalid Node.js Version". Risk is low because `vercel build` + `deploy --prebuilt` builds on the **GitHub runner**, not Vercel's build infra, so Vercel's Node setting barely participates. If it does complain, set `engines` to `22.x` and match `node-version` in the workflow.
   - **Pre-existing deprecation warning to fix later, not urgent:** the runner annotates every job with "Node.js 20 is deprecated… `actions/checkout@v4`, `actions/setup-node@v4` are being forced to run on Node.js 24." That's about the *actions'* own runtime, not our `node-version: 20` input. Left as-is since the spec pins these versions explicitly and it's currently a warning, not a failure; bumping to `actions/checkout@v5` + `actions/setup-node@v5` is the fix when it starts to matter.
   - **Separately worth reconsidering:** `node-version: 20` sits exactly on Vite 8's floor (`^20.19.0`), and Node 20 is itself past end-of-life. It works today. Moving the workflow and `engines` to Node 22 would be the more durable choice, but it contradicts the pinned spec, so it's flagged for the owner rather than changed unilaterally.
 - Architecture.md impact: §12 — job names and structure are unchanged from the plan, so no structural edit. Updated §12 to record the actual type-check/lint commands, the corrected Node engines range, and that the three secrets are still outstanding so the deploy jobs have never run.
