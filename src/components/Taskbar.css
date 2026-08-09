@@ -1,6 +1,5 @@
-/* Taskbar tabs, ported from portfolio-os-mockup.html's #taskbar/.taskbar-tab
-   (architecture.md §6). Start button and clock arrive in Phase 3 (SPIKE-12);
-   this covers only what SPIKE-09 needs: one tab per open window. */
+/* Taskbar chrome, ported from portfolio-os-mockup.html's #taskbar/#start-btn/
+   .taskbar-tab/#clock rules (architecture.md §6). */
 
 .taskbar {
   position: absolute;
@@ -30,4 +29,35 @@
 .taskbar-tab.active {
   color: var(--ink);
   background: var(--magenta);
+}
+
+.start-btn {
+  font-size: 10px;
+  color: var(--ink);
+  background: var(--yellow);
+  border: none;
+  padding: 9px 12px;
+  cursor: pointer;
+  animation: taskbar-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes taskbar-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.65;
+  }
+}
+
+.start-btn:hover {
+  opacity: 1;
+  filter: brightness(1.1);
+}
+
+.clock {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--green);
 }
