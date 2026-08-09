@@ -1,0 +1,48 @@
+/* Desktop shell chrome ported from portfolio-os-mockup.html's #desktop/
+   #wordmark rules (architecture.md §6). */
+
+.desktop {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  background: radial-gradient(ellipse at 50% 30%, #12122a 0%, var(--ink) 70%);
+}
+
+.wordmark {
+  position: absolute;
+  top: 14px;
+  right: 20px;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--cyan);
+  opacity: 0.55;
+  z-index: var(--z-wordmark);
+}
+
+.shutdown-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-takeover);
+  background: var(--ink);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 20px;
+  text-align: center;
+  color: var(--paper);
+  cursor: pointer;
+}
+
+.shutdown-overlay p {
+  font-size: 13px;
+  max-width: 32ch;
+}
+
+.shutdown-hint {
+  font-size: 18px;
+  color: var(--cyan);
+  opacity: 0.8;
+}
