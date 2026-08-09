@@ -1,20 +1,35 @@
-/* Phase 1 scaffold. The token-proof page from SPIKE-02 has served its purpose;
-   this is a temporary state-inspector harness confirming OSProvider/useOS work
-   end to end. Both get replaced by the real Desktop in Phase 2/3. */
+/* Phase 2 scaffold. WindowManager and Taskbar are the real components; the
+   floating panel below is a debug harness for opening windows and inspecting
+   state without DesktopIconGrid/StartMenu, which land in Phase 3. Both the
+   panel and this file get replaced by the real Desktop then. */
 
 import { OSProvider, useOS } from './state/osContext'
+import { WindowManager } from './components/WindowManager'
+import { Taskbar } from './components/Taskbar'
 
-function StateHarness() {
+function DebugPanel() {
   const { state, dispatch } = useOS()
-  const viewport = { width: window.innerWidth, height: window.innerHeight }
 
   return (
-    <div style={{ padding: 20, height: '100%', overflowY: 'auto' }}>
+    <div
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        zIndex: 1000,
+        padding: 12,
+        background: 'rgba(11, 11, 22, 0.85)',
+        // Only the controls below opt back in — otherwise this overlay's
+        // padding/background would sit above the default window position
+        // (250,90) and silently swallow drags/clicks meant for the window.
+        pointerEvents: 'none',
+      }}
+    >
       <div className="pixel" style={{ fontSize: 10, color: 'var(--cyan)', letterSpacing: 2 }}>
-        PORTFOLIO-OS — STATE HARNESS
+        PORTFOLIO-OS — PHASE 2 HARNESS
       </div>
 
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 16 }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 12, pointerEvents: 'auto' }}>
         {(['about', 'projects', 'resume', 'contact', 'terminal'] as const).map((appType) => (
           <button
             key={appType}
@@ -34,35 +49,8 @@ function StateHarness() {
         ))}
       </div>
 
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 10 }}>
-        {Object.values(state.windows).map((w) => (
-          <div key={w.id} style={{ display: 'flex', gap: 4 }}>
-            <span style={{ fontSize: 16, alignSelf: 'center' }}>{w.id}</span>
-            <button onClick={() => dispatch({ type: 'FOCUS_WINDOW', id: w.id })}>focus</button>
-            <button onClick={() => dispatch({ type: 'MINIMIZE_WINDOW', id: w.id })}>_</button>
-            <button onClick={() => dispatch({ type: 'TOGGLE_MAXIMIZE', id: w.id, viewport })}>
-              □
-            </button>
-            <button onClick={() => dispatch({ type: 'RESTORE_WINDOW', id: w.id })}>restore</button>
-            <button onClick={() => dispatch({ type: 'CLOSE_WINDOW', id: w.id })}>X</button>
-          </div>
-        ))}
-      </div>
-
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 12 }}>
-        <button onClick={() => dispatch({ type: 'LOAD_TRACK', videoId: 'aAkMkVFwAoo' })}>
-          load track
-        </button>
-        <button onClick={() => dispatch({ type: 'SET_VOLUME', volume: 23 })}>volume 23</button>
-        <button onClick={() => dispatch({ type: 'TOGGLE_MUTE' })}>mute</button>
-        <button onClick={() => dispatch({ type: 'OPEN_WINDOW', appType: 'about' })}>
-          open about
-        </button>
-      </div>
-
       <pre
-        id="state-dump"
-        style={{ fontSize: 14, marginTop: 16, color: 'var(--green)', fontFamily: 'inherit' }}
+        style={{ fontSize: 13, marginTop: 12, color: 'var(--green)', fontFamily: 'inherit' }}
       >
         {JSON.stringify(
           {
@@ -73,14 +61,6 @@ function StateHarness() {
               .filter((w) => w.minimized)
               .map((w) => w.id),
             nextZIndex: state.nextZIndex,
-            music: {
-              videoId: state.music.videoId,
-              isDefaultTrack: state.music.isDefaultTrack,
-              volume: state.music.volume,
-              isMuted: state.music.isMuted,
-              isPlaying: state.music.isPlaying,
-              awaitingUserGesture: state.music.awaitingUserGesture,
-            },
           },
           null,
           2,
@@ -93,7 +73,11 @@ function StateHarness() {
 function App() {
   return (
     <OSProvider>
-      <StateHarness />
+      <div style={{ position: 'relative', height: '100%' }}>
+        <DebugPanel />
+        <WindowManager />
+        <Taskbar />
+      </div>
     </OSProvider>
   )
 }
