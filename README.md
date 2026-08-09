@@ -20,14 +20,20 @@ Planning docs live in `specs/` (gitignored — local reference only, not part of
 | 1 — Core OS state & types | Done |
 | 2 — Window manager (drag, resize, focus/z-index, minimize/maximize/close, taskbar sync) | Done |
 | 3 — Desktop shell (icons, Start Menu, taskbar chrome, boot screen) | Done |
-| 4 — Live background | Not started |
+| 4 — Live background (cityscape parallax, car, starfield, scanlines, reduced motion) | Done |
 | 5 — Music player | Not started |
 | 6 — Apps (About/Projects/Resume/Contact/Terminal) | Not started |
 | 7 — Accessibility | Not started |
 | 8 — Quality & release | Not started |
 
-`src/App.tsx` now plays the boot sequence once, then mounts the real `Desktop` (icons, Start
-Menu, windows, taskbar). Live background, music, and real app content still land in Phases 4-6.
+`src/App.tsx` plays the boot sequence once, then mounts the real `Desktop`: animated neon
+cityscape, driving car, starfield, CRT scanlines, icons, Start Menu, windows, and taskbar.
+Background music and real app content still land in Phases 5-6.
+
+The background is CSS/SVG parallax with no per-frame JavaScript, it freezes under
+`prefers-reduced-motion`, and it stops entirely in a backgrounded tab. One Phase 4 exit
+criterion is **not** met: it has not been profiled on a physical mid-range phone, only under 4x
+CPU throttling at a phone-sized viewport. See `specs/spikes.md` SPIKE-17 for the numbers.
 
 ## Local development
 

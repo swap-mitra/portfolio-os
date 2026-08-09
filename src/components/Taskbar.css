@@ -6,7 +6,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  height: 44px;
+  height: var(--taskbar-height);
   background: var(--ink-2);
   border-top: 2px solid var(--cyan);
   box-shadow: 0 0 10px rgba(35, 240, 255, 0.35);
@@ -54,6 +54,15 @@
 .start-btn:hover {
   opacity: 1;
   filter: brightness(1.1);
+}
+
+/* A permanently pulsing button is the one piece of Phase 3 chrome that belongs
+   in Phase 4's reduced-motion pass (architecture.md §10); SPIKE-29 audits the
+   rest. */
+@media (prefers-reduced-motion: reduce) {
+  .start-btn {
+    animation: none;
+  }
 }
 
 .clock {

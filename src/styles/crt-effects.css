@@ -1,0 +1,80 @@
+/* Decorative CRT layers: the twinkling starfield and the scanline overlay,
+   both ported from portfolio-os-mockup.html (SPIKE-16). Imported by the two
+   components in components/background/ that use them. */
+
+.starfield {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-starfield);
+  pointer-events: none;
+}
+
+.star {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: var(--paper);
+  opacity: 0.5;
+}
+
+/* Only the subset Starfield marks (see SPIKE-17: animating all 40 cost more
+   than the whole cityscape). `will-change` promotes those few so the twinkle
+   composites instead of repainting a region of the full-viewport desktop layer;
+   it deliberately sits here and not on `.star`, since promoting 28 static
+   elements would be memory spent for nothing. */
+.star--twinkle {
+  animation: twinkle 3.5s ease-in-out infinite;
+  will-change: opacity;
+}
+
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.15;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+/* Sits above the windows, as in the mockup, since the whole desktop is behind the
+   same glass. Verified in SPIKE-16 that the mockup's 0.22 black and multiply
+   blend still read correctly over the moving cityscape, so both are unchanged. */
+.scanlines {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-scanlines);
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.22) 0px,
+    rgba(0, 0, 0, 0.22) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  mix-blend-mode: multiply;
+  animation: flicker 7s ease-in-out infinite;
+}
+
+@keyframes flicker {
+  0%,
+  96%,
+  100% {
+    opacity: 1;
+  }
+  97% {
+    opacity: 0.85;
+  }
+  98% {
+    opacity: 1;
+  }
+}
+
+/* Keep the scanlines, drop the flicker; keep the stars, drop the twinkle
+   (architecture.md §10: simplify the motion, don't remove the art). */
+@media (prefers-reduced-motion: reduce) {
+  .star--twinkle,
+  .scanlines {
+    animation: none;
+  }
+}

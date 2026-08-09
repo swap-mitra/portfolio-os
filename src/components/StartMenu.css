@@ -3,7 +3,7 @@
 
 .start-menu {
   position: absolute;
-  bottom: 52px;
+  bottom: calc(var(--taskbar-height) + 8px);
   left: 10px;
   background: var(--ink-2);
   border: 2px solid var(--yellow);

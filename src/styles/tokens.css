@@ -18,6 +18,11 @@
   --font-display: 'Press Start 2P', monospace;
   --font-body: 'VT323', monospace;
 
+  /* The taskbar's height is a shared contract, not just its own business: the
+     cityscape's road and building layers are positioned relative to the top of
+     it, and would float or hide behind it if the two drifted apart (SPIKE-14). */
+  --taskbar-height: 44px;
+
   /* Layer stack, back to front (architecture.md §6). Named so components
      can't drift out of agreement about who sits above whom. */
   --z-cityscape: 0;

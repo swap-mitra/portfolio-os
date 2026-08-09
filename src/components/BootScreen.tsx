@@ -5,6 +5,7 @@
 
 import { useEffect, useState } from 'react'
 import './BootScreen.css'
+import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion'
 
 const LINES = [
   'PORTFOLIO-OS v1.0',
@@ -17,7 +18,7 @@ const LINE_DELAY_MS = 400
 const HOLD_MS = 900
 
 export function BootScreen({ onDone }: { onDone: () => void }) {
-  const [skip] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+  const skip = usePrefersReducedMotion()
   const [visibleLines, setVisibleLines] = useState(0)
 
   useEffect(() => {

@@ -9,6 +9,21 @@
   background: radial-gradient(ellipse at 50% 30%, #12122a 0%, var(--ink) 70%);
 }
 
+/* Backgrounded tab: freeze every animation on the desktop rather than leaving
+   the cityscape, starfield, and Start button burning battery unseen. Browsers
+   already throttle animation in a hidden tab, so this is belt and braces for
+   the ones that don't (SPIKE-17).
+
+   `!important` is load-bearing here, not laziness. Every animated component
+   declares the `animation` shorthand, which re-sets animation-play-state to
+   `running`, and `*` contributes nothing to specificity, so `.desktop--paused *`
+   ties with `.cityscape-strip` and loses on source order. Measured: without
+   this, the class applied and nothing actually paused. */
+.desktop--paused,
+.desktop--paused * {
+  animation-play-state: paused !important;
+}
+
 .wordmark {
   position: absolute;
   top: 14px;
