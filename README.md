@@ -70,6 +70,15 @@ To enable deploys:
    preview URL, then merge it and confirm the production URL updates. Open both URLs — a green
    check on the Action is not proof the site works.
 
+That is the whole list. Nothing else is required on the Vercel side, and no repo settings need
+changing: `deploy-preview` carries its own `permissions: { contents: read, pull-requests: write }`
+block so it can post the PR comment despite the repo's read-only default `GITHUB_TOKEN`.
+
+The Vercel CLI is pinned to `npx vercel@58` so a future major release can't break deploys without
+a visible change here. Note the build actually runs **on the GitHub runner** (`vercel build` +
+`vercel deploy --prebuilt`), not on Vercel's build infrastructure — so the runner's Node version,
+not the Vercel project's, is what builds the site.
+
 `.vercel/` is gitignored. No Vercel credentials belong in the repo or in `.env.local` — they are
 deploy-time only, used by the Actions runner, and never bundled into the shipped site.
 
