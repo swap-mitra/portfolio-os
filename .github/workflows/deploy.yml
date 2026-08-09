@@ -42,6 +42,18 @@ jobs:
         with:
           node-version: 20
       - run: npm ci
+      # TEMPORARY diagnostic — remove before merging. Identifies whether the
+      # token can see the team that owns the project, and whether either ID
+      # secret picked up stray whitespace. Prints lengths, never values.
+      - name: Diagnose Vercel credentials
+        continue-on-error: true
+        run: |
+          echo "VERCEL_ORG_ID length: ${#VERCEL_ORG_ID} (expected 29)"
+          echo "VERCEL_PROJECT_ID length: ${#VERCEL_PROJECT_ID} (expected 32)"
+          echo "--- whoami ---"
+          npx vercel@58 whoami --token=${{ secrets.VERCEL_TOKEN }} || echo "whoami FAILED"
+          echo "--- teams this token can see ---"
+          npx vercel@58 teams ls --token=${{ secrets.VERCEL_TOKEN }} || echo "teams ls FAILED"
       - run: npx vercel@58 pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
       - run: npx vercel@58 build --token=${{ secrets.VERCEL_TOKEN }}
       - id: deploy
