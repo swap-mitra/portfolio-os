@@ -1,5 +1,9 @@
 name: CI/CD
 
+# Credentials come from GitHub Actions repository secrets and nowhere else.
+# Never inline a token or ID here: this file is tracked, the repo is public,
+# and `run:` commands are echoed into the workflow logs, which are also public.
+
 on:
   push:
     branches: [main]
