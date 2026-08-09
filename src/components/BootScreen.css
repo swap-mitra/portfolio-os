@@ -1,0 +1,30 @@
+.boot-screen {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-takeover);
+  background: var(--ink);
+  color: var(--green);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  padding: 40px;
+  font-size: 12px;
+  line-height: 2;
+}
+
+.boot-hint {
+  margin-top: 24px;
+  opacity: 0.6;
+  animation: boot-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes boot-pulse {
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 0.2;
+  }
+}

@@ -29,4 +29,7 @@
   --z-music: 55;
   --z-taskbar: 60;
   --z-startmenu: 70;
+  /* Full-page takeovers (boot sequence, shutdown joke) sit above everything
+     else, including the Start Menu. */
+  --z-takeover: 100;
 }
