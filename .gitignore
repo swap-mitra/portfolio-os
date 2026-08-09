@@ -25,3 +25,6 @@ dist-ssr
 
 # Vercel CLI
 .vercel
+
+# Planning docs (architecture, spikes, project spec, mockup) — local reference only
+specs/
