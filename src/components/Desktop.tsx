@@ -1,6 +1,5 @@
 /* The real desktop shell (architecture.md §2), replacing the Phase 2 debug
-   harness in App.tsx. The music widget (Phase 5) isn't built yet, so it isn't
-   mounted here. */
+   harness in App.tsx. */
 
 import { useEffect, useState } from 'react'
 import './Desktop.css'
@@ -12,6 +11,7 @@ import { DesktopIconGrid } from './DesktopIconGrid'
 import { WindowManager } from './WindowManager'
 import { StartMenu } from './StartMenu'
 import { Taskbar } from './Taskbar'
+import { MusicPlayer } from './audio/MusicPlayer'
 
 /* Nothing on this desktop is worth animating for a tab nobody is looking at
    (SPIKE-17). Owned here rather than inside the background components so one
@@ -49,6 +49,7 @@ export function Desktop() {
       <DesktopIconGrid />
       <WindowManager />
       <StartMenu />
+      <MusicPlayer />
       <Taskbar />
       {state.shuttingDown && (
         <div

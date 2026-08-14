@@ -1,0 +1,86 @@
+/* Music widget chrome (architecture.md §8.4). The mockup has no music widget
+   to port, so this is built from the same vocabulary as the taskbar: ink
+   panel, neon border, pixel font on the labels. Sits just above the taskbar in
+   the bottom-right corner, small enough not to compete with the desktop. */
+
+.music-player {
+  position: absolute;
+  right: 10px;
+  bottom: calc(var(--taskbar-height) + 10px);
+  z-index: var(--z-music);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 250px;
+  padding: 8px;
+  background: var(--ink-2);
+  border: 2px solid var(--cyan);
+  box-shadow: 0 0 10px rgba(35, 240, 255, 0.35);
+}
+
+/* The player is audio-only; 1px keeps it rendered without showing it. */
+.music-host {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.music-host iframe {
+  border: 0;
+}
+
+.music-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.music-btn {
+  font-size: 9px;
+  color: var(--ink);
+  background: var(--cyan);
+  border: none;
+  padding: 6px 8px;
+  cursor: pointer;
+}
+
+.music-btn:hover {
+  filter: brightness(1.15);
+}
+
+.music-volume {
+  flex: 1;
+  min-width: 0;
+  accent-color: var(--magenta);
+}
+
+.music-label {
+  font-size: 6px;
+  color: var(--green);
+}
+
+.music-url {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--paper);
+  background: var(--ink-3);
+  border: 1px solid var(--magenta);
+  padding: 4px 6px;
+}
+
+.music-note {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.2;
+  color: var(--yellow);
+}
+
+.music-error {
+  color: var(--magenta);
+}
