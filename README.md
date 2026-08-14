@@ -21,19 +21,30 @@ Planning docs live in `specs/` (gitignored — local reference only, not part of
 | 2 — Window manager (drag, resize, focus/z-index, minimize/maximize/close, taskbar sync) | Done |
 | 3 — Desktop shell (icons, Start Menu, taskbar chrome, boot screen) | Done |
 | 4 — Live background (cityscape parallax, car, starfield, scanlines, reduced motion) | Done |
-| 5 — Music player | Not started |
+| 5 — Music player | Done |
 | 6 — Apps (About/Projects/Resume/Contact/Terminal) | Not started |
 | 7 — Accessibility | Not started |
 | 8 — Quality & release | Not started |
 
 `src/App.tsx` plays the boot sequence once, then mounts the real `Desktop`: animated neon
-cityscape, driving car, starfield, CRT scanlines, icons, Start Menu, windows, and taskbar.
-Background music and real app content still land in Phases 5-6.
+cityscape, driving car, starfield, CRT scanlines, icons, Start Menu, windows, taskbar, and the
+music widget. Real app content still lands in Phase 6.
 
 The background is CSS/SVG parallax with no per-frame JavaScript, it freezes under
-`prefers-reduced-motion`, and it stops entirely in a backgrounded tab. One Phase 4 exit
-criterion is **not** met: it has not been profiled on a physical mid-range phone, only under 4x
-CPU throttling at a phone-sized viewport. See `specs/spikes.md` SPIKE-17 for the numbers.
+`prefers-reduced-motion`, and it stops entirely in a backgrounded tab.
+
+Music is the official YouTube IFrame Player API: the site controls an embedded player, it never
+downloads or hosts audio. A default track autoplays **muted** (browsers block unmuted autoplay
+without a gesture), and the first click or keypress anywhere on the page unmutes it. Visitors can
+paste any YouTube URL to swap the track; volume, mute, and the chosen track persist to
+`localStorage`, window layout deliberately does not. The default track lives in
+`src/data/siteConfig.ts` and must be one whose uploader allows embedding.
+
+Two exit criteria across the phases so far are **not** met, both for want of hardware:
+
+- the background has not been profiled on a physical mid-range phone, only under 4x CPU
+  throttling at a phone-sized viewport (`specs/spikes.md` SPIKE-17);
+- the autoplay/unmute flow is verified in Chrome only, not Firefox or Safari (SPIKE-20).
 
 ## Local development
 
