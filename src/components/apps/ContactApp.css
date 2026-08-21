@@ -1,0 +1,45 @@
+/* Same heading treatment as AboutApp — cyan display font over the window
+   body's VT323 — with the rows as a label/value pair per line. */
+
+.contact-heading {
+  font-size: 12px;
+  color: var(--cyan);
+  margin: 0 0 14px;
+  line-height: 1.4;
+}
+
+.contact-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.contact-list li {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--ink-3);
+}
+
+.contact-list li:last-child {
+  border-bottom: none;
+}
+
+/* Fixed width so the values line up in a column without a table. */
+.contact-label {
+  flex-shrink: 0;
+  width: 90px;
+  color: var(--yellow);
+}
+
+.contact-list a {
+  color: var(--green);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.contact-list a:hover,
+.contact-list a:focus-visible {
+  text-decoration: underline;
+}
