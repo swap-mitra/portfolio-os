@@ -132,6 +132,16 @@ export function saveMusicState(music: MusicState): void {
     on a visitor whose stored blob predates it. */
 export function hydrateInitialState(base: OSState = initialState): OSState {
   const saved = loadMusicState()
+
+  /* A stored default track is not a preference, it is a copy of whatever
+     DEFAULT_VIDEO_ID happened to be on the visitor's last visit. Restoring it
+     would pin every returning visitor to that old ID forever, so changing the
+     constant (as we had to when the previous default stopped allowing embeds)
+     would reach new visitors only. Dropping it lets MusicPlayer's empty-videoId
+     branch apply the current default. A track the visitor actually chose is
+     still restored. */
+  if (saved.isDefaultTrack === true) delete saved.videoId
+
   return {
     ...base,
     music: {

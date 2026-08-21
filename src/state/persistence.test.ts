@@ -107,6 +107,16 @@ describe('hydration merges rather than replaces', () => {
     expect(s.focusedWindowId).toBeNull()
   })
 
+  it('drops a stored default track so a changed DEFAULT_VIDEO_ID reaches returning visitors', () => {
+    // The previous default stopped allowing embeds; a visitor who had it
+    // stored must not be pinned to it after the constant changes.
+    map.set(KEY, JSON.stringify({ videoId: '6aouLxiL4Cw', isDefaultTrack: true, volume: 30 }))
+    const s = hydrateInitialState()
+    expect(s.music.videoId).toBe(initialState.music.videoId)
+    // Everything the visitor actually chose still survives.
+    expect(s.music.volume).toBe(30)
+  })
+
   it('fills in fields a stored blob predates', () => {
     // Blob written before `isMuted` existed: it must still get its default.
     map.set(KEY, JSON.stringify({ videoId: 'dQw4w9WgXcQ', volume: 10 }))
