@@ -7,8 +7,10 @@ import { useOS } from '../state/osContext'
 import { useDraggable } from '../hooks/useDraggable'
 import { useResizable } from '../hooks/useResizable'
 import { MIN_HEIGHT, MIN_WIDTH } from '../state/osReducer'
+import type { ReactNode } from 'react'
 import type { AppType, WindowState } from '../types/os'
 import { AboutApp } from './apps/AboutApp'
+import { ProjectsApp } from './apps/ProjectsApp'
 
 /* Placeholder labels until siteConfig.ts (Phase 6) supplies real copy —
    reused by Taskbar so tab and title-bar text never drift apart. A separate
@@ -21,6 +23,14 @@ export const APP_LABELS: Record<AppType, string> = {
   resume: 'RESUME.PDF',
   contact: 'CONTACT.EXE',
   terminal: 'TERMINAL.EXE',
+}
+
+/* Apps land one per spike (Phase 6); an app with no entry yet renders its
+   label as a stand-in. Elements rather than component references because
+   none of them take props, and only one window per app is ever open. */
+const APP_BODIES: Partial<Record<AppType, ReactNode>> = {
+  about: <AboutApp />,
+  projects: <ProjectsApp />,
 }
 
 export function Window({ window: win }: { window: WindowState }) {
@@ -69,11 +79,7 @@ export function Window({ window: win }: { window: WindowState }) {
           </button>
         </div>
       </div>
-      {/* Apps land one per spike (Phase 6); the label is the stand-in until
-          each one exists. */}
-      <div className="window-body">
-        {win.appType === 'about' ? <AboutApp /> : APP_LABELS[win.appType]}
-      </div>
+      <div className="window-body">{APP_BODIES[win.appType] ?? APP_LABELS[win.appType]}</div>
       <div
         className="resize-handle"
         onPointerDown={(e) => {
