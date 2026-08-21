@@ -1,4 +1,4 @@
-/* Bio copy for the About window (architecture.md §4). Placeholder text —
+/* Bio copy for the About window (architecture.md §4). Placeholder text:
    project-spec.md §7 lists the real bio as owner-supplied before launch.
    Swap the strings here; AboutApp needs no changes.
 

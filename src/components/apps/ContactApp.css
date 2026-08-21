@@ -1,5 +1,5 @@
-/* Same heading treatment as AboutApp — cyan display font over the window
-   body's VT323 — with the rows as a label/value pair per line. */
+/* Same heading treatment as AboutApp (cyan display font over the window
+   body's VT323), with the rows as a label/value pair per line. */
 
 .contact-heading {
   font-size: 12px;

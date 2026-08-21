@@ -7,7 +7,7 @@ export interface Project {
   id: string
   title: string
   /** One line. The row layout gives it a single wrapped paragraph, not an
-      essay — anything longer belongs behind the link. */
+      essay, and anything longer belongs behind the link. */
   description: string
   /** Where the project actually lives (demo, article, store page). */
   link: string

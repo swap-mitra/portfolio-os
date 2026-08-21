@@ -1,4 +1,4 @@
-/* The portfolio's project list (architecture.md §4). Placeholder entries —
+/* The portfolio's project list (architecture.md §4). Placeholder entries:
    these three are the mockup's, kept so the window matches the approved
    reference; project-spec.md §7 has the owner supplying the real ones.
 

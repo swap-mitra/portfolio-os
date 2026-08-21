@@ -1,4 +1,4 @@
-/* Contact window contents (SPIKE-26). Email is a mailto: — same tab, the
+/* Contact window contents (SPIKE-26). Email is a mailto:, so it stays in the same tab: the
    browser hands it to a mail client and never navigates away. Profiles are
    external, so they get a new tab plus noopener noreferrer like the project
    links do. */

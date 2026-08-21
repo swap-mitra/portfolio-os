@@ -1,4 +1,4 @@
-/* About window contents (SPIKE-23) — the pattern the other four apps follow:
+/* About window contents (SPIKE-23). The pattern the other four apps follow:
    a component under apps/ that renders a typed file from src/data/ and
    nothing else. Window.tsx supplies the scrolling, padded body around it. */
 
