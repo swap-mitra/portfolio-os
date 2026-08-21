@@ -1,0 +1,43 @@
+/* The preview has to fill the window, so this app opts out of .window-body's
+   scrolling and padding: the PDF viewer brings its own scrollbar, and a
+   padded gutter around an embedded viewer just wastes an already small
+   window. Hence the negative margins undoing .window-body's padding. */
+
+.resume-app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  margin: -14px -16px;
+}
+
+.resume-preview {
+  flex: 1;
+  /* Percentage heights don't resolve inside a flex item on every engine, so
+     the floor keeps the viewer visible even where flex-basis: auto wins. */
+  min-height: 200px;
+  width: 100%;
+  border: none;
+  background: var(--ink-3);
+}
+
+.resume-fallback {
+  margin: 0;
+  padding: 16px;
+  line-height: 1.3;
+}
+
+.resume-download {
+  flex-shrink: 0;
+  display: block;
+  padding: 10px;
+  text-align: center;
+  font-size: 10px;
+  color: var(--ink);
+  background: var(--cyan);
+  text-decoration: none;
+}
+
+.resume-download:hover,
+.resume-download:focus-visible {
+  filter: brightness(1.1);
+}

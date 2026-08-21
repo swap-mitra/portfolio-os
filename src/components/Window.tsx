@@ -12,6 +12,7 @@ import type { AppType, WindowState } from '../types/os'
 import { AboutApp } from './apps/AboutApp'
 import { ProjectsApp } from './apps/ProjectsApp'
 import { ContactApp } from './apps/ContactApp'
+import { ResumeApp } from './apps/ResumeApp'
 
 /* Placeholder labels until siteConfig.ts (Phase 6) supplies real copy —
    reused by Taskbar so tab and title-bar text never drift apart. A separate
@@ -33,6 +34,7 @@ const APP_BODIES: Partial<Record<AppType, ReactNode>> = {
   about: <AboutApp />,
   projects: <ProjectsApp />,
   contact: <ContactApp />,
+  resume: <ResumeApp />,
 }
 
 export function Window({ window: win }: { window: WindowState }) {
