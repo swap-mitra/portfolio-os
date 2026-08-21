@@ -25,3 +25,7 @@ export const contact = {
     { label: 'LINKEDIN', url: 'https://example.com/linkedin-placeholder' },
   ],
 }
+
+/** Served straight out of public/, so the path is absolute from the site
+    root and identical in dev and production (SPIKE-25). */
+export const RESUME_PATH = '/resume.pdf'
