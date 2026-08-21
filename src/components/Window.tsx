@@ -8,6 +8,7 @@ import { useDraggable } from '../hooks/useDraggable'
 import { useResizable } from '../hooks/useResizable'
 import { MIN_HEIGHT, MIN_WIDTH } from '../state/osReducer'
 import type { AppType, WindowState } from '../types/os'
+import { AboutApp } from './apps/AboutApp'
 
 /* Placeholder labels until siteConfig.ts (Phase 6) supplies real copy —
    reused by Taskbar so tab and title-bar text never drift apart. A separate
@@ -68,7 +69,11 @@ export function Window({ window: win }: { window: WindowState }) {
           </button>
         </div>
       </div>
-      <div className="window-body">{APP_LABELS[win.appType]}</div>
+      {/* Apps land one per spike (Phase 6); the label is the stand-in until
+          each one exists. */}
+      <div className="window-body">
+        {win.appType === 'about' ? <AboutApp /> : APP_LABELS[win.appType]}
+      </div>
       <div
         className="resize-handle"
         onPointerDown={(e) => {
