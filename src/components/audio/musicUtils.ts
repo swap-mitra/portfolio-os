@@ -65,3 +65,24 @@ export const PARSE_ERROR = "Couldn't find a video in that link. Try pasting the 
 export const ENDED = 0
 export const PLAYING = 1
 export const PAUSED = 2
+
+/** The player's `onError` codes, per the IFrame API reference. They mean
+    genuinely different things to a visitor (one is "pick another video",
+    another is "this one is gone", another is "reload"), and collapsing them
+    into a single message also threw away the only clue about which of the
+    five actually happened. */
+export function playerErrorMessage(code: number): string {
+  switch (code) {
+    case 2:
+      return "That video ID isn't valid. Try pasting the full YouTube URL."
+    case 5:
+      return "The player couldn't load that video. Reloading the page usually fixes it."
+    case 100:
+      return "That video doesn't exist any more, or it's private."
+    case 101:
+    case 150:
+      return "That video's owner doesn't allow it to be played on other sites. Try another one."
+    default:
+      return `The player refused that video (YouTube error ${code}). Try a different one.`
+  }
+}

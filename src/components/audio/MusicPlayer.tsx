@@ -11,7 +11,7 @@ import type { FormEvent } from 'react'
 import './MusicPlayer.css'
 import { useOS } from '../../state/osContext'
 import { DEFAULT_VIDEO_ID } from '../../data/siteConfig'
-import { ENDED, PARSE_ERROR, PAUSED, PLAYING, extractVideoId } from './musicUtils'
+import { ENDED, PARSE_ERROR, PAUSED, PLAYING, extractVideoId, playerErrorMessage } from './musicUtils'
 import type { YTApi, YTPlayer } from '../../types/youtube'
 
 const API_SRC = 'https://www.youtube.com/iframe_api'
@@ -93,11 +93,12 @@ export function MusicPlayer() {
             // param and stops working after loadVideoById.
             else if (e.data === ENDED) e.target.playVideo()
           },
-          onError: () => {
-            dispatch({
-              type: 'MUSIC_ERROR',
-              message: "That video can't be played here. Try a different one.",
-            })
+          onError: (e) => {
+            /* The code is the only diagnosis there is, since YouTube
+               reports the reason nowhere else, so it goes to the console even though
+               the visitor gets prose. */
+            console.error('YouTube player error', e.data, 'for video', videoId)
+            dispatch({ type: 'MUSIC_ERROR', message: playerErrorMessage(e.data) })
           },
         },
       })
