@@ -16,6 +16,21 @@ export interface DraggableHandlers {
   onPointerCancel: (e: ReactPointerEvent<HTMLElement>) => void
 }
 
+/** Controls inside a drag handle are not drag starts.
+
+    Capturing the pointer retargets the whole rest of the gesture to the
+    capture element, and that includes the compatibility `click`. So a press
+    on a title-bar button made the title bar capture the pointer, and the
+    click then arrived at the title bar instead of the button: minimize,
+    maximize, and close silently did nothing. Verified in Chrome, which
+    reports `click target=window-titlebar` for a press on the close button.
+
+    Duck-typed rather than `instanceof Element` so it can be tested in node,
+    where there is no DOM. */
+export function isControlPress(target: { closest?: (selector: string) => unknown } | null): boolean {
+  return target?.closest?.('button') != null
+}
+
 /** Pure so it's testable without a DOM or a live pointer sequence. */
 export function clampDragPosition(
   rawX: number,
@@ -41,6 +56,7 @@ export function useDraggable(
   const onPointerDown = useCallback(
     (e: ReactPointerEvent<HTMLElement>) => {
       if (e.button !== 0) return
+      if (isControlPress(e.target as HTMLElement)) return
       const bounds = getBounds()
       offset.current = { x: e.clientX - bounds.x, y: e.clientY - bounds.y }
       e.currentTarget.setPointerCapture(e.pointerId)

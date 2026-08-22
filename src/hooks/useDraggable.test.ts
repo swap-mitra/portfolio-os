@@ -1,7 +1,25 @@
 import { describe, expect, it } from 'vitest'
-import { clampDragPosition } from './useDraggable'
+import { clampDragPosition, isControlPress } from './useDraggable'
 
 const viewport = { width: 1280, height: 800 }
+
+describe('isControlPress', () => {
+  /** Stands in for an event target: `closest` is the only thing read. */
+  const target = (hit: boolean) => ({ closest: () => (hit ? {} : null) })
+
+  it('treats a press on a title-bar button as a control, not a drag', () => {
+    expect(isControlPress(target(true))).toBe(true)
+  })
+
+  it('treats a press on the bare title bar as a drag', () => {
+    expect(isControlPress(target(false))).toBe(false)
+  })
+
+  it('survives a target that cannot be asked', () => {
+    expect(isControlPress(null)).toBe(false)
+    expect(isControlPress({})).toBe(false)
+  })
+})
 
 describe('clampDragPosition', () => {
   it('passes through positions well inside the viewport', () => {
