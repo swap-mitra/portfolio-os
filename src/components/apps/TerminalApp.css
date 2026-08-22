@@ -1,0 +1,45 @@
+/* The terminal brings its own ground, so it opts out of .window-body's
+   padding the way ResumeApp does. Green on near-black rather than the OS
+   magenta/cyan: a terminal that doesn't look like a terminal isn't a joke
+   anyone gets. */
+
+.terminal {
+  min-height: 100%;
+  margin: -14px -16px;
+  padding: 10px 12px;
+  background: var(--ink);
+  color: var(--green);
+  line-height: 1.25;
+  cursor: text;
+}
+
+.terminal-line {
+  /* Output indents itself with spaces, and a blank line still takes a row. */
+  white-space: pre-wrap;
+  min-height: 1.25em;
+  overflow-wrap: anywhere;
+}
+
+.terminal-form {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+}
+
+.terminal-prompt {
+  flex-shrink: 0;
+}
+
+.terminal-input {
+  flex: 1;
+  min-width: 0;
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--paper);
+  font: inherit;
+  /* The global :focus-visible ring is right everywhere else, but this input
+     holds focus the entire time the window is open, so it would draw a
+     permanent box around the prompt. The caret is the focus indicator here. */
+  outline: none;
+}

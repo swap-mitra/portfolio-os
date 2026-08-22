@@ -13,6 +13,7 @@ import { AboutApp } from './apps/AboutApp'
 import { ProjectsApp } from './apps/ProjectsApp'
 import { ContactApp } from './apps/ContactApp'
 import { ResumeApp } from './apps/ResumeApp'
+import { TerminalApp } from './apps/TerminalApp'
 
 /* Placeholder labels until siteConfig.ts (Phase 6) supplies real copy —
    reused by Taskbar so tab and title-bar text never drift apart. A separate
@@ -27,14 +28,16 @@ export const APP_LABELS: Record<AppType, string> = {
   terminal: 'TERMINAL.EXE',
 }
 
-/* Apps land one per spike (Phase 6); an app with no entry yet renders its
-   label as a stand-in. Elements rather than component references because
-   none of them take props, and only one window per app is ever open. */
-const APP_BODIES: Partial<Record<AppType, ReactNode>> = {
+/* Elements rather than component references because none of them take props,
+   and only one window per app is ever open. Every app exists as of SPIKE-27,
+   so this is a full Record and no longer Partial: a sixth AppType now fails
+   to compile here instead of quietly opening an empty window. */
+const APP_BODIES: Record<AppType, ReactNode> = {
   about: <AboutApp />,
   projects: <ProjectsApp />,
   contact: <ContactApp />,
   resume: <ResumeApp />,
+  terminal: <TerminalApp />,
 }
 
 export function Window({ window: win }: { window: WindowState }) {
@@ -83,7 +86,7 @@ export function Window({ window: win }: { window: WindowState }) {
           </button>
         </div>
       </div>
-      <div className="window-body">{APP_BODIES[win.appType] ?? APP_LABELS[win.appType]}</div>
+      <div className="window-body">{APP_BODIES[win.appType]}</div>
       <div
         className="resize-handle"
         onPointerDown={(e) => {
