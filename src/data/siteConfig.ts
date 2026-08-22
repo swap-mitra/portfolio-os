@@ -3,20 +3,24 @@
    being scaffolded empty now. */
 
 /** Track that plays on first load, before a visitor pastes their own URL.
-    Currently "Cartoon - On & On (feat. Daniel Levi)", an NCS release, whose
-    whole point is being free to use and spread.
+    "Cartoon - On & On (feat. Daniel Levi)", an NCS release, whose whole
+    point is being free to use and spread.
 
-    The previous default, `6aouLxiL4Cw`, began returning **error 150,
-    embedding disallowed** and shipped as silence. Embeddability is a
-    property of the upload and the owner can revoke it at any time, so this
-    constant rots on its own.
+    Embeddability is a property of the upload and the owner can revoke it at
+    any time, so this constant rots on its own. Two IDs have already died
+    here: `6aouLxiL4Cw`, and Kavinsky's "Nightcall" (`MV_3Dpw-BRY`), whose
+    label allows the video on YouTube but not on other sites. Both report
+    **error 150**. Don't swap in a reupload to get around that; the rights
+    holder turned embedding off on purpose.
 
-    There is no way to check it from a script. Verified failing: the oEmbed
-    endpoint returns 200 for a video with embedding disabled, and the watch
-    page reports `"playableInEmbed":true` for one too, when fetched without
-    a browser session. Only a real player at a real origin knows. So the
-    check is: load the site, watch for the error, read the code the console
-    logs (see MusicPlayer onError). */
+    No server-side probe can tell you which is which: the oEmbed endpoint
+    returns 200 for a video with embedding disabled, and the watch page
+    reports `"playableInEmbed":true` for one too when fetched without a
+    browser session. Even `onReady` fires for a dead one. What separates
+    them is playing the video in a real player at a real origin and then
+    waiting: an unembeddable video reports a 0s duration and errors a moment
+    after it says it's ready. This ID was checked that way, in headless
+    Chrome against the dev server, and played 208s. */
 export const DEFAULT_VIDEO_ID = 'K4DyBUG242c'
 
 /** Contact details for the Contact window (SPIKE-26). The phone number on
