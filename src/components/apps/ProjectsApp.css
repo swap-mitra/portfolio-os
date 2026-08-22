@@ -44,15 +44,11 @@
   margin: 0;
 }
 
-.proj-repo {
-  display: inline-block;
-  margin-top: 4px;
+/* The stack line sits between the title and the prose, the way it would on
+   a resume entry. Green so it reads as metadata, not as another sentence. */
+.proj-stack {
   color: var(--green);
   font-size: 16px;
-  text-decoration: none;
-}
-
-.proj-repo:hover,
-.proj-repo:focus-visible {
-  text-decoration: underline;
+  line-height: 1.3;
+  margin: 0 0 4px;
 }

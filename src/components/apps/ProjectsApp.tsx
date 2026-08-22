@@ -25,17 +25,8 @@ export function ProjectsApp() {
             >
               {project.title}
             </a>
+            <p className="proj-stack">{project.stack}</p>
             <p className="proj-desc">{project.description}</p>
-            {project.repoUrl && (
-              <a
-                className="proj-repo"
-                href={project.repoUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                [source]
-              </a>
-            )}
           </div>
         </div>
       ))}

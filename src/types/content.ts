@@ -9,8 +9,8 @@ export interface Project {
   /** One line. The row layout gives it a single wrapped paragraph, not an
       essay, and anything longer belongs behind the link. */
   description: string
-  /** Where the project actually lives (demo, article, store page). */
+  /** What it's built with, as one comma-separated line. Shown verbatim. */
+  stack: string
+  /** Where the project actually lives: repo, demo, article, store page. */
   link: string
-  /** Source, when it's public. Plenty of real work has no repo to show. */
-  repoUrl?: string
 }

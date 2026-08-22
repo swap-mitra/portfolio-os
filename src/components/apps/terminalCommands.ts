@@ -42,8 +42,11 @@ const commands: Record<string, Handler> = {
 
   skills: () => out(...about.skills.map((skill) => `  ${skill}`)),
 
+  /* Stack and link rather than the full description: the descriptions are
+     paragraphs, and four of them in a row is a wall of text in a terminal.
+     The Projects window is where the prose belongs. */
   projects: () =>
-    out(...projects.flatMap((project) => [project.title, `  ${project.description}`, `  ${project.link}`])),
+    out(...projects.flatMap((project) => [project.title, `  ${project.stack}`, `  ${project.link}`])),
 
   play: (arg) => {
     if (arg === '') return out('Usage: play <youtube-url>')
