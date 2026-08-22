@@ -7,6 +7,7 @@ import './StartMenu.css'
 import { useOS } from '../state/osContext'
 import { APP_LABELS } from './Window'
 import { START_BUTTON_ID, focusById } from './focusIds'
+import { currentViewport } from './viewport'
 import type { AppType } from '../types/os'
 
 const PROGRAM_APPS: AppType[] = ['about', 'projects', 'contact', 'terminal']
@@ -43,7 +44,8 @@ export function StartMenu() {
 
   if (!state.startMenuOpen) return null
 
-  const openApp = (appType: AppType) => dispatch({ type: 'OPEN_WINDOW', appType })
+  const openApp = (appType: AppType) =>
+    dispatch({ type: 'OPEN_WINDOW', appType, viewport: currentViewport() })
 
   return (
     <div className="start-menu pixel" ref={menuRef}>

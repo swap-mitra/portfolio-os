@@ -9,11 +9,22 @@ import type { AppType, OSState, WindowBounds, WindowState } from '../types/os'
 export const MIN_WIDTH = 280
 export const MIN_HEIGHT = 200
 
-/** New windows open at the mockup's `.win` position and size. */
-export const DEFAULT_WIDTH = 420
-export const DEFAULT_HEIGHT = 330
-const DEFAULT_X = 250
-const DEFAULT_Y = 90
+/** Opening size, per app. The mockup's single 420x330 `.win` was a stand-in
+    for a window with three lines of placeholder text in it; real content
+    needs more, and needs different amounts. The terminal wants width so
+    output doesn't wrap mid-thought, the resume wants height because it is
+    showing a page. Clamped to the viewport on open, so a small screen gets a
+    smaller window rather than one hanging off the edge. */
+export const OPEN_SIZE: Record<AppType, { width: number; height: number }> = {
+  about: { width: 620, height: 470 },
+  projects: { width: 680, height: 530 },
+  resume: { width: 640, height: 580 },
+  contact: { width: 520, height: 280 },
+  terminal: { width: 700, height: 470 },
+}
+
+/** Breathing room kept between a freshly opened window and the viewport edge. */
+const OPEN_MARGIN = 16
 
 /** Each additional open window steps down-right so they don't stack exactly
     on top of each other, wrapping before it can march off-screen. */
@@ -38,7 +49,7 @@ export interface Viewport {
 }
 
 export type Action =
-  | { type: 'OPEN_WINDOW'; appType: AppType }
+  | { type: 'OPEN_WINDOW'; appType: AppType; viewport: Viewport }
   | { type: 'CLOSE_WINDOW'; id: string }
   | { type: 'FOCUS_WINDOW'; id: string }
   | { type: 'MOVE_WINDOW'; id: string; x: number; y: number }
@@ -79,6 +90,12 @@ export const initialState: OSState = {
   },
   reducedMotion: false,
 }
+
+/** `Math.min(Math.max())`, but safe when the range is inverted: a viewport
+    too small for the minimum size must still yield the minimum, not a
+    negative. */
+const clamp = (value: number, lo: number, hi: number): number =>
+  Math.min(Math.max(value, lo), Math.max(lo, hi))
 
 const bounds = (w: WindowState): WindowBounds => ({
   x: w.x,
@@ -134,13 +151,28 @@ export function osReducer(state: OSState, action: Action): OSState {
       if (existing !== undefined) return focus(state, existing.id)
 
       const step = Object.keys(state.windows).length % CASCADE_WRAP
+      const wanted = OPEN_SIZE[action.appType]
+      const { width: vw, height: vh } = action.viewport
+      const width = clamp(wanted.width, MIN_WIDTH, vw - OPEN_MARGIN * 2)
+      const height = clamp(wanted.height, MIN_HEIGHT, vh - MAX_VERTICAL_INSET)
+
+      /* Centred, then stepped down-right per window already open, so a stack
+         of them fans out from the middle instead of hugging a corner. */
       const created: WindowState = {
         id: action.appType,
         appType: action.appType,
-        x: DEFAULT_X + step * CASCADE_STEP,
-        y: DEFAULT_Y + step * CASCADE_STEP,
-        width: DEFAULT_WIDTH,
-        height: DEFAULT_HEIGHT,
+        x: clamp(
+          Math.round((vw - width) / 2) + step * CASCADE_STEP,
+          OPEN_MARGIN,
+          vw - width - OPEN_MARGIN,
+        ),
+        y: clamp(
+          Math.round((vh - MAX_VERTICAL_INSET - height) / 2) + step * CASCADE_STEP,
+          OPEN_MARGIN,
+          vh - MAX_VERTICAL_INSET - height + OPEN_MARGIN,
+        ),
+        width,
+        height,
         zIndex: state.nextZIndex,
         minimized: false,
         maximized: false,
@@ -204,12 +236,9 @@ export function osReducer(state: OSState, action: Action): OSState {
       if (target === undefined) return state
 
       if (target.maximized) {
-        const restored = target.prevBounds ?? {
-          x: DEFAULT_X,
-          y: DEFAULT_Y,
-          width: DEFAULT_WIDTH,
-          height: DEFAULT_HEIGHT,
-        }
+        // A maximized window always has prevBounds; the fallback is only
+        // here so the type doesn't have to lie about that.
+        const restored = target.prevBounds ?? { x: 40, y: 40, ...OPEN_SIZE[target.appType] }
         return patchWindow(state, action.id, {
           ...restored,
           maximized: false,

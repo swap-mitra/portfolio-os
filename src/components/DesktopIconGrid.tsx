@@ -6,6 +6,7 @@ import './DesktopIconGrid.css'
 import { useOS } from '../state/osContext'
 import { DesktopIcon } from './DesktopIcon'
 import { APP_LABELS } from './Window'
+import { currentViewport } from './viewport'
 import type { AppType } from '../types/os'
 
 const APP_ORDER: AppType[] = ['about', 'projects', 'resume', 'contact', 'terminal']
@@ -22,7 +23,7 @@ export function DesktopIconGrid() {
           label={APP_LABELS[appType]}
           selected={state.selectedIconId === appType}
           onSelect={() => dispatch({ type: 'SELECT_ICON', appType })}
-          onOpen={() => dispatch({ type: 'OPEN_WINDOW', appType })}
+          onOpen={() => dispatch({ type: 'OPEN_WINDOW', appType, viewport: currentViewport() })}
         />
       ))}
     </div>

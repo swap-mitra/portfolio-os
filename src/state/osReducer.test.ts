@@ -1,16 +1,14 @@
 import { describe, expect, it } from 'vitest'
 import type { OSState } from '../types/os'
-import {
-  DEFAULT_HEIGHT,
-  DEFAULT_WIDTH,
-  MIN_HEIGHT,
-  MIN_WIDTH,
-  initialState,
-  osReducer,
-} from './osReducer'
+import { MIN_HEIGHT, MIN_WIDTH, OPEN_SIZE, initialState, osReducer } from './osReducer'
 import type { Action } from './osReducer'
+import type { AppType } from '../types/os'
 
 const viewport = { width: 1280, height: 800 }
+
+/** Every open carries the viewport, so the reducer can size and place the
+    window against it. */
+const open = (appType: AppType): Action => ({ type: 'OPEN_WINDOW', appType, viewport })
 
 /** Apply a sequence of actions, so tests read as the flow they describe. */
 const run = (...actions: Action[]): OSState => actions.reduce(osReducer, initialState)
@@ -18,9 +16,9 @@ const run = (...actions: Action[]): OSState => actions.reduce(osReducer, initial
 describe('opening windows', () => {
   it('assigns an incrementing zIndex per window', () => {
     const s = run(
-      { type: 'OPEN_WINDOW', appType: 'about' },
-      { type: 'OPEN_WINDOW', appType: 'projects' },
-      { type: 'OPEN_WINDOW', appType: 'terminal' },
+      open('about'),
+      open('projects'),
+      open('terminal'),
     )
     const zs = ['about', 'projects', 'terminal'].map((id) => s.windows[id]!.zIndex)
     expect(zs).toEqual([...zs].sort((a, b) => a - b))
@@ -29,22 +27,22 @@ describe('opening windows', () => {
   })
 
   it('focuses the newly opened window', () => {
-    const s = run({ type: 'OPEN_WINDOW', appType: 'about' }, { type: 'OPEN_WINDOW', appType: 'contact' })
+    const s = run(open('about'), open('contact'))
     expect(s.focusedWindowId).toBe('contact')
   })
 
   it('opens at the default size and cascades position so windows do not stack exactly', () => {
-    const s = run({ type: 'OPEN_WINDOW', appType: 'about' }, { type: 'OPEN_WINDOW', appType: 'projects' })
-    expect(s.windows['about']).toMatchObject({ width: DEFAULT_WIDTH, height: DEFAULT_HEIGHT })
+    const s = run(open('about'), open('projects'))
+    expect(s.windows['about']).toMatchObject(OPEN_SIZE.about)
     expect(s.windows['projects']!.x).not.toBe(s.windows['about']!.x)
     expect(s.windows['projects']!.y).not.toBe(s.windows['about']!.y)
   })
 
   it('re-opening an already-open app focuses it instead of creating a duplicate', () => {
     const s = run(
-      { type: 'OPEN_WINDOW', appType: 'about' },
-      { type: 'OPEN_WINDOW', appType: 'projects' },
-      { type: 'OPEN_WINDOW', appType: 'about' },
+      open('about'),
+      open('projects'),
+      open('about'),
     )
     expect(Object.keys(s.windows)).toHaveLength(2)
     expect(s.focusedWindowId).toBe('about')
@@ -53,16 +51,16 @@ describe('opening windows', () => {
 
   it('re-opening a minimized app un-minimizes it', () => {
     const s = run(
-      { type: 'OPEN_WINDOW', appType: 'about' },
+      open('about'),
       { type: 'MINIMIZE_WINDOW', id: 'about' },
-      { type: 'OPEN_WINDOW', appType: 'about' },
+      open('about'),
     )
     expect(s.windows['about']!.minimized).toBe(false)
     expect(s.focusedWindowId).toBe('about')
   })
 
   it('closes the start menu, since apps are also launched from it', () => {
-    const s = run({ type: 'TOGGLE_START_MENU' }, { type: 'OPEN_WINDOW', appType: 'resume' })
+    const s = run({ type: 'TOGGLE_START_MENU' }, open('resume'))
     expect(s.startMenuOpen).toBe(false)
   })
 })
@@ -70,9 +68,9 @@ describe('opening windows', () => {
 describe('focus / z-index stacking', () => {
   it('focusing a background window brings it to front', () => {
     const s = run(
-      { type: 'OPEN_WINDOW', appType: 'about' },
-      { type: 'OPEN_WINDOW', appType: 'projects' },
-      { type: 'OPEN_WINDOW', appType: 'terminal' },
+      open('about'),
+      open('projects'),
+      open('terminal'),
       { type: 'FOCUS_WINDOW', id: 'about' },
     )
     expect(s.focusedWindowId).toBe('about')
@@ -81,7 +79,7 @@ describe('focus / z-index stacking', () => {
   })
 
   it('re-focusing the already-focused window is a no-op, so the counter does not creep', () => {
-    const opened = run({ type: 'OPEN_WINDOW', appType: 'about' })
+    const opened = run(open('about'))
     const again = osReducer(osReducer(opened, { type: 'FOCUS_WINDOW', id: 'about' }), {
       type: 'FOCUS_WINDOW',
       id: 'about',
@@ -96,7 +94,7 @@ describe('focus / z-index stacking', () => {
     // layer, so these values are compared among windows and never against the
     // scanline/taskbar/start-menu layers (architecture.md §6). Asserting a
     // ceiling here instead would be asserting a bug.
-    let s = run({ type: 'OPEN_WINDOW', appType: 'about' }, { type: 'OPEN_WINDOW', appType: 'projects' })
+    let s = run(open('about'), open('projects'))
     for (let i = 0; i < 500; i++) {
       s = osReducer(s, { type: 'FOCUS_WINDOW', id: i % 2 === 0 ? 'about' : 'projects' })
     }
@@ -106,7 +104,7 @@ describe('focus / z-index stacking', () => {
   })
 
   it('ignores focus for an unknown id rather than inventing a window', () => {
-    const s = run({ type: 'OPEN_WINDOW', appType: 'about' })
+    const s = run(open('about'))
     expect(osReducer(s, { type: 'FOCUS_WINDOW', id: 'nope' })).toBe(s)
   })
 })
@@ -114,8 +112,8 @@ describe('focus / z-index stacking', () => {
 describe('closing windows', () => {
   it('removes the window entirely, so its taskbar tab disappears', () => {
     const s = run(
-      { type: 'OPEN_WINDOW', appType: 'about' },
-      { type: 'OPEN_WINDOW', appType: 'projects' },
+      open('about'),
+      open('projects'),
       { type: 'CLOSE_WINDOW', id: 'about' },
     )
     expect(s.windows['about']).toBeUndefined()
@@ -124,41 +122,41 @@ describe('closing windows', () => {
 
   it('hands focus to the next visible window instead of dropping it', () => {
     const s = run(
-      { type: 'OPEN_WINDOW', appType: 'about' },
-      { type: 'OPEN_WINDOW', appType: 'projects' },
+      open('about'),
+      open('projects'),
       { type: 'CLOSE_WINDOW', id: 'projects' },
     )
     expect(s.focusedWindowId).toBe('about')
   })
 
   it('focus becomes null when the last window closes', () => {
-    const s = run({ type: 'OPEN_WINDOW', appType: 'about' }, { type: 'CLOSE_WINDOW', id: 'about' })
+    const s = run(open('about'), { type: 'CLOSE_WINDOW', id: 'about' })
     expect(s.focusedWindowId).toBeNull()
   })
 
   it('re-opening a closed app creates a fresh window, not a stale one', () => {
     const s = run(
-      { type: 'OPEN_WINDOW', appType: 'about' },
+      open('about'),
       { type: 'MOVE_WINDOW', id: 'about', x: 999, y: 999 },
       { type: 'CLOSE_WINDOW', id: 'about' },
-      { type: 'OPEN_WINDOW', appType: 'about' },
+      open('about'),
     )
-    expect(s.windows['about']).toMatchObject({ width: DEFAULT_WIDTH, height: DEFAULT_HEIGHT })
+    expect(s.windows['about']).toMatchObject(OPEN_SIZE.about)
     expect(s.windows['about']!.x).not.toBe(999)
   })
 })
 
 describe('minimize / restore', () => {
   it('keeps the window in state so the taskbar tab survives', () => {
-    const s = run({ type: 'OPEN_WINDOW', appType: 'about' }, { type: 'MINIMIZE_WINDOW', id: 'about' })
+    const s = run(open('about'), { type: 'MINIMIZE_WINDOW', id: 'about' })
     expect(s.windows['about']).toBeDefined()
     expect(s.windows['about']!.minimized).toBe(true)
   })
 
   it('drops focus when the focused window is minimized', () => {
     const s = run(
-      { type: 'OPEN_WINDOW', appType: 'about' },
-      { type: 'OPEN_WINDOW', appType: 'projects' },
+      open('about'),
+      open('projects'),
       { type: 'MINIMIZE_WINDOW', id: 'projects' },
     )
     expect(s.focusedWindowId).toBe('about')
@@ -166,8 +164,8 @@ describe('minimize / restore', () => {
 
   it('restoring un-minimizes and brings to front', () => {
     const s = run(
-      { type: 'OPEN_WINDOW', appType: 'about' },
-      { type: 'OPEN_WINDOW', appType: 'projects' },
+      open('about'),
+      open('projects'),
       { type: 'MINIMIZE_WINDOW', id: 'about' },
       { type: 'RESTORE_WINDOW', id: 'about' },
     )
@@ -180,7 +178,7 @@ describe('minimize / restore', () => {
     // Regression: `focus` short-circuits on the already-focused window, which
     // would otherwise leave a lone minimized window stuck minimized.
     const s = run(
-      { type: 'OPEN_WINDOW', appType: 'about' },
+      open('about'),
       { type: 'MINIMIZE_WINDOW', id: 'about' },
       { type: 'RESTORE_WINDOW', id: 'about' },
     )
@@ -192,19 +190,26 @@ describe('minimize / restore', () => {
 describe('maximize', () => {
   it('stores pre-maximize bounds and expands without going fullscreen', () => {
     const s = run(
-      { type: 'OPEN_WINDOW', appType: 'about' },
+      open('about'),
       { type: 'TOGGLE_MAXIMIZE', id: 'about', viewport },
     )
+    const opened = run(open('about')).windows['about']!
     const w = s.windows['about']!
     expect(w.maximized).toBe(true)
-    expect(w.prevBounds).toEqual({ x: 250, y: 90, width: DEFAULT_WIDTH, height: DEFAULT_HEIGHT })
+    // The contract is "whatever it was before", not a particular number.
+    expect(w.prevBounds).toEqual({
+      x: opened.x,
+      y: opened.y,
+      width: opened.width,
+      height: opened.height,
+    })
     expect(w.width).toBeLessThan(viewport.width)
     expect(w.height).toBeLessThan(viewport.height)
   })
 
   it('toggling again restores the exact previous position and size', () => {
     const s = run(
-      { type: 'OPEN_WINDOW', appType: 'about' },
+      open('about'),
       { type: 'MOVE_WINDOW', id: 'about', x: 412, y: 133 },
       { type: 'RESIZE_WINDOW', id: 'about', width: 500, height: 360 },
       { type: 'TOGGLE_MAXIMIZE', id: 'about', viewport },
@@ -222,7 +227,7 @@ describe('maximize', () => {
 
   it('never shrinks below the minimums on a tiny viewport', () => {
     const s = run(
-      { type: 'OPEN_WINDOW', appType: 'about' },
+      open('about'),
       { type: 'TOGGLE_MAXIMIZE', id: 'about', viewport: { width: 200, height: 150 } },
     )
     expect(s.windows['about']!.width).toBe(MIN_WIDTH)
@@ -231,7 +236,7 @@ describe('maximize', () => {
 
   it('survives minimize → maximize → restore → close without orphans', () => {
     const s = run(
-      { type: 'OPEN_WINDOW', appType: 'about' },
+      open('about'),
       { type: 'MINIMIZE_WINDOW', id: 'about' },
       { type: 'TOGGLE_MAXIMIZE', id: 'about', viewport },
       { type: 'RESTORE_WINDOW', id: 'about' },
@@ -245,25 +250,24 @@ describe('maximize', () => {
 
 describe('move / resize', () => {
   it('moving does not change size', () => {
-    const s = run({ type: 'OPEN_WINDOW', appType: 'about' }, { type: 'MOVE_WINDOW', id: 'about', x: 10, y: 20 })
+    const s = run(open('about'), { type: 'MOVE_WINDOW', id: 'about', x: 10, y: 20 })
     expect(s.windows['about']).toMatchObject({
       x: 10,
       y: 20,
-      width: DEFAULT_WIDTH,
-      height: DEFAULT_HEIGHT,
+      ...OPEN_SIZE.about,
     })
   })
 
   it('clamps to the minimum size', () => {
     const s = run(
-      { type: 'OPEN_WINDOW', appType: 'about' },
+      open('about'),
       { type: 'RESIZE_WINDOW', id: 'about', width: 10, height: 10 },
     )
     expect(s.windows['about']).toMatchObject({ width: MIN_WIDTH, height: MIN_HEIGHT })
   })
 
   it('ignores move/resize for a window that was already closed', () => {
-    const s = run({ type: 'OPEN_WINDOW', appType: 'about' }, { type: 'CLOSE_WINDOW', id: 'about' })
+    const s = run(open('about'), { type: 'CLOSE_WINDOW', id: 'about' })
     expect(osReducer(s, { type: 'MOVE_WINDOW', id: 'about', x: 1, y: 1 })).toBe(s)
   })
 })
@@ -366,7 +370,7 @@ describe('immutability', () => {
   it('never mutates the state it was handed', () => {
     const before = JSON.stringify(initialState)
     run(
-      { type: 'OPEN_WINDOW', appType: 'about' },
+      open('about'),
       { type: 'MOVE_WINDOW', id: 'about', x: 5, y: 5 },
       { type: 'TOGGLE_MAXIMIZE', id: 'about', viewport },
       { type: 'CLOSE_WINDOW', id: 'about' },
