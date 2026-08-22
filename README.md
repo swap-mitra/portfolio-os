@@ -1,7 +1,8 @@
 # Portfolio-OS
 
 A personal portfolio presented as a fictional retro desktop operating system — neon-on-black
-arcade styling, draggable windows, an animated cityscape background, and background music.
+arcade styling, draggable windows, an endless synthwave drive for a background, and background
+music.
 
 Static single-page app: React + Vite + TypeScript, no backend, no database.
 
@@ -20,15 +21,14 @@ Planning docs live in `specs/` (gitignored — local reference only, not part of
 | 1 — Core OS state & types | Done |
 | 2 — Window manager (drag, resize, focus/z-index, minimize/maximize/close, taskbar sync) | Done |
 | 3 — Desktop shell (icons, Start Menu, taskbar chrome, boot screen) | Done |
-| 4 — Live background (cityscape parallax, car, starfield, scanlines, reduced motion) | Done |
+| 4 — Live background (drive scene, scanlines, reduced motion) | Done |
 | 5 — Music player | Done |
 | 6 — Apps (About/Projects/Resume/Contact/Terminal) | Done |
 | 7 — Accessibility & responsiveness | Done |
 | 8 — Quality & release | Not started |
 
 `src/App.tsx` plays the boot sequence once, then mounts the real `Desktop`: animated neon
-cityscape, driving car, starfield, CRT scanlines, icons, Start Menu, windows, taskbar, and the
-music widget.
+drive scene, CRT scanlines, icons, Start Menu, windows, taskbar, and the music widget.
 
 All five windows render real content. About and Projects read their copy from `src/data/`,
 Contact reads `siteConfig.ts`, Resume previews `public/resume.pdf` inline with a download button
@@ -40,8 +40,15 @@ The copy is real, not placeholder. Bio and skills live in `src/data/about.ts`, t
 in `src/data/projects.ts`, email and profile links in `src/data/siteConfig.ts`, and the resume is
 `public/resume.pdf`. Nothing else needs touching to update any of it.
 
-The background is CSS/SVG parallax with no per-frame JavaScript, it freezes under
-`prefers-reduced-motion`, and it stops entirely in a backgrounded tab.
+The background is a canvas scene drawn per frame: gradient sky, banded sun, mountain ridges, a
+perspective grid, and a road that scrolls towards you. Every frame is a pure function of elapsed
+seconds, which is what makes `prefers-reduced-motion` a one-liner (draw frame zero, never
+schedule another) and keeps two machines at different frame rates on the same stretch of road.
+It stops in a backgrounded tab because `requestAnimationFrame` already does. Measured at 15ms
+median frame time under 4x CPU throttling at 1280x800, and 5.1ms at phone size.
+
+It replaced a CSS/SVG parallax cityscape, which is still in the history if it is ever wanted
+back.
 
 Music is the official YouTube IFrame Player API: the site controls an embedded player, it never
 downloads or hosts audio. A default track autoplays **muted** (browsers block unmuted autoplay

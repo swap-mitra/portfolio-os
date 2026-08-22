@@ -1,0 +1,27 @@
+/* The canvas fills the desktop and sits at the very back, below the icons,
+   windows, and chrome. It draws its own sky, so the desktop's own background
+   gradient is never seen once this is mounted. */
+
+.drive {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  z-index: var(--z-cityscape);
+}
+
+/* Darkens the corners so the icons and windows have something to sit against.
+   A separate layer rather than part of the scene: it belongs to the desktop
+   reading well, not to the drive looking right. */
+.drive-vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: var(--z-starfield);
+  background: radial-gradient(
+    ellipse at 50% 55%,
+    rgba(0, 0, 0, 0) 35%,
+    rgba(11, 11, 22, 0.75) 100%
+  );
+}

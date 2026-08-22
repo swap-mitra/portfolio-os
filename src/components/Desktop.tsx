@@ -4,8 +4,7 @@
 import { useEffect, useState } from 'react'
 import './Desktop.css'
 import { useOS } from '../state/osContext'
-import { CityscapeBackground } from './background/CityscapeBackground'
-import { Starfield } from './background/Starfield'
+import { DriveBackground } from './background/DriveBackground'
 import { ScanlineOverlay } from './background/ScanlineOverlay'
 import { DesktopIconGrid } from './DesktopIconGrid'
 import { WindowManager } from './WindowManager'
@@ -64,8 +63,8 @@ export function Desktop() {
         }
       }}
     >
-      <CityscapeBackground />
-      <Starfield />
+      <DriveBackground />
+      <div className="drive-vignette" aria-hidden="true" />
       <ScanlineOverlay />
       <div className="wordmark pixel">PORTFOLIO-OS</div>
       <DesktopIconGrid />
