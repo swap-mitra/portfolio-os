@@ -12,6 +12,8 @@ import { WindowManager } from './WindowManager'
 import { StartMenu } from './StartMenu'
 import { Taskbar } from './Taskbar'
 import { MusicPlayer } from './audio/MusicPlayer'
+import { globalKeyAction } from '../state/globalKeys'
+import { focusById, iconId } from './focusIds'
 
 /* Nothing on this desktop is worth animating for a tab nobody is looking at
    (SPIKE-17). Owned here rather than inside the background components so one
@@ -32,6 +34,26 @@ function useDocumentHidden(): boolean {
 export function Desktop() {
   const { state, dispatch } = useOS()
   const hidden = useDocumentHidden()
+
+  /* One keydown listener for the whole desktop, so the precedence between
+     "close the menu" and "close the window" lives in globalKeys.ts rather
+     than in whichever component happened to add its listener first
+     (SPIKE-28). */
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      const action = globalKeyAction(e.key, state)
+      if (action === null) return
+      e.preventDefault()
+      // Focus has to leave the window before the window stops existing.
+      if (action.type === 'CLOSE_WINDOW') {
+        const closing = state.windows[action.id]
+        if (closing !== undefined) focusById(iconId(closing.appType))
+      }
+      dispatch(action)
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [state, dispatch])
 
   return (
     <div
@@ -54,13 +76,17 @@ export function Desktop() {
       {state.shuttingDown && (
         <div
           className="shutdown-overlay"
+          /* Nothing in here is focusable, and focus is left behind on the
+             Start button, so a screen reader needs telling that the screen
+             was taken over. Any key dismisses it (globalKeys.ts). */
+          role="alert"
           onClick={(e) => {
             e.stopPropagation()
             dispatch({ type: 'SET_SHUTDOWN', shuttingDown: false })
           }}
         >
           <p className="pixel">IT&apos;S NOW SAFE TO TURN OFF YOUR COMPUTER.</p>
-          <p className="shutdown-hint">(not really — click anywhere to boot back up)</p>
+          <p className="shutdown-hint">(not really: press any key or click to boot back up)</p>
         </div>
       )}
     </div>
