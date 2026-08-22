@@ -6,7 +6,7 @@
 .resume-app {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  height: calc(100% + 28px);
   margin: -14px -16px;
 }
 
