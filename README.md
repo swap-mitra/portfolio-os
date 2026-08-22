@@ -36,9 +36,9 @@ beside it, and Terminal runs a small hardcoded command set (`help`, `whoami`, `s
 `projects`, and `play <youtube-url>`, which swaps the background track through the same action
 the music widget's URL box dispatches).
 
-Everything except the resume PDF is still placeholder copy. The bio, the three projects, and the
-contact links all need replacing before launch, and each of them lives in exactly one file under
-`src/data/`.
+The copy is real, not placeholder. Bio and skills live in `src/data/about.ts`, the project list
+in `src/data/projects.ts`, email and profile links in `src/data/siteConfig.ts`, and the resume is
+`public/resume.pdf`. Nothing else needs touching to update any of it.
 
 The background is CSS/SVG parallax with no per-frame JavaScript, it freezes under
 `prefers-reduced-motion`, and it stops entirely in a backgrounded tab.
