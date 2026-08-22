@@ -19,17 +19,17 @@
     logs (see MusicPlayer onError). */
 export const DEFAULT_VIDEO_ID = 'K4DyBUG242c'
 
-/** Contact details for the Contact window (SPIKE-26). Placeholders except
-    the GitHub handle, which is this repo's own remote; project-spec.md §7
-    has the owner supplying the real address and profiles before launch.
+/** Contact details for the Contact window (SPIKE-26). The phone number on
+    the resume is deliberately not here: the PDF is a deliberate hand-off, a
+    contact page is a scraper target.
 
     No interface in types/content.ts: one consumer, so the literal's
     inferred shape is the type (same call as data/about.ts). */
 export const contact = {
-  email: 'you@example.com',
+  email: 'swpnlmitra@gmail.com',
   profiles: [
     { label: 'GITHUB', url: 'https://github.com/swap-mitra' },
-    { label: 'LINKEDIN', url: 'https://example.com/linkedin-placeholder' },
+    { label: 'LINKEDIN', url: 'https://www.linkedin.com/in/swapnilmitra/' },
   ],
 }
 
