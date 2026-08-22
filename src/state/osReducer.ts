@@ -72,7 +72,6 @@ export type Action =
   | { type: 'SET_VOLUME'; volume: number }
   | { type: 'TOGGLE_MUTE' }
   | { type: 'MUSIC_GESTURE_RESOLVED' }
-  | { type: 'SET_REDUCED_MOTION'; reducedMotion: boolean }
 
 export const initialState: OSState = {
   windows: {},
@@ -92,7 +91,6 @@ export const initialState: OSState = {
     awaitingUserGesture: true,
     lastError: null,
   },
-  reducedMotion: false,
 }
 
 /** `Math.min(Math.max())`, but safe when the range is inverted: a viewport
@@ -329,8 +327,5 @@ export function osReducer(state: OSState, action: Action): OSState {
           volume: state.music.volume === 0 ? AUDIBLE_VOLUME : state.music.volume,
         },
       }
-
-    case 'SET_REDUCED_MOTION':
-      return { ...state, reducedMotion: action.reducedMotion }
   }
 }

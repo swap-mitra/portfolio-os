@@ -371,12 +371,6 @@ describe('music', () => {
   })
 })
 
-describe('reduced motion', () => {
-  it('mirrors the media query', () => {
-    expect(run({ type: 'SET_REDUCED_MOTION', reducedMotion: true }).reducedMotion).toBe(true)
-  })
-})
-
 describe('immutability', () => {
   it('never mutates the state it was handed', () => {
     const before = JSON.stringify(initialState)

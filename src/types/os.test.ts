@@ -38,7 +38,6 @@ const base: OSState = {
   shuttingDown: false,
   nextZIndex: 20,
   music,
-  reducedMotion: false,
 }
 
 describe('OSState covers the mockup interactions', () => {

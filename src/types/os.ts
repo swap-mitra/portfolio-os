@@ -57,6 +57,4 @@ export interface OSState {
   /** Incrementing counter for bring-to-front. */
   nextZIndex: number
   music: MusicState
-  /** Mirrors prefers-reduced-motion; read once and subscribed. */
-  reducedMotion: boolean
 }
