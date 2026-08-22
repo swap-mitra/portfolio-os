@@ -23,7 +23,7 @@ Planning docs live in `specs/` (gitignored — local reference only, not part of
 | 4 — Live background (cityscape parallax, car, starfield, scanlines, reduced motion) | Done |
 | 5 — Music player | Done |
 | 6 — Apps (About/Projects/Resume/Contact/Terminal) | Done |
-| 7 — Accessibility | Not started |
+| 7 — Accessibility & responsiveness | Done |
 | 8 — Quality & release | Not started |
 
 `src/App.tsx` plays the boot sequence once, then mounts the real `Desktop`: animated neon
@@ -50,11 +50,19 @@ paste any YouTube URL to swap the track; volume, mute, and the chosen track pers
 `localStorage`, window layout deliberately does not. The default track lives in
 `src/data/siteConfig.ts` and must be one whose uploader allows embedding.
 
-Two exit criteria across the phases so far are **not** met, both for want of hardware:
+Below 768px an app opens fullscreen instead of as a floating window, with drag and resize
+handlers detached rather than just restyled, and close as the only control. The breakpoint lives
+in two places that must agree: `src/hooks/useIsMobile.ts` decides which handlers attach,
+`src/styles/responsive.css` decides what it looks like.
+
+Three exit criteria across the phases so far are **not** met, all for want of hardware:
 
 - the background has not been profiled on a physical mid-range phone, only under 4x CPU
   throttling at a phone-sized viewport (`specs/spikes.md` SPIKE-17);
-- the autoplay/unmute flow is verified in Chrome only, not Firefox or Safari (SPIKE-20).
+- the autoplay/unmute flow is verified in Chrome only, not Firefox or Safari (SPIKE-20);
+- the mobile layout is verified against emulated devices and across the breakpoint, but not on a
+  real phone, so touch target sizes and viewport quirks (safe areas, address bar show/hide) are
+  unchecked (SPIKE-30).
 
 ## Local development
 
