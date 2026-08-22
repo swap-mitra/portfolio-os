@@ -332,6 +332,17 @@ describe('music', () => {
     expect(s.music).toMatchObject({ isMuted: false, awaitingUserGesture: false, isPlaying: true })
   })
 
+  it('raises a stored volume of 0, since unmuting into silence is not unmuting', () => {
+    const s = run({ type: 'SET_VOLUME', volume: 0 }, { type: 'MUSIC_GESTURE_RESOLVED' })
+    expect(s.music.volume).toBeGreaterThan(0)
+    expect(s.music.isMuted).toBe(false)
+  })
+
+  it('leaves an audible stored volume alone', () => {
+    const s = run({ type: 'SET_VOLUME', volume: 20 }, { type: 'MUSIC_GESTURE_RESOLVED' })
+    expect(s.music.volume).toBe(20)
+  })
+
   it('mute toggles without destroying the volume level', () => {
     const s = run({ type: 'SET_VOLUME', volume: 45 }, { type: 'TOGGLE_MUTE' })
     expect(s.music.volume).toBe(45)

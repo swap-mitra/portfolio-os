@@ -40,6 +40,10 @@ const MAX_MARGIN = 20
 /** Vertical room left for the 44px taskbar plus breathing space. */
 const MAX_VERTICAL_INSET = 120
 
+/** Volume the first gesture restores to when the stored preference is 0.
+    Also the starting volume, so the two can't drift apart. */
+const AUDIBLE_VOLUME = 70
+
 /** Base z-index for windows, matching `--z-windows` in tokens.css. */
 const BASE_Z_INDEX = 20
 
@@ -84,7 +88,7 @@ export const initialState: OSState = {
     isDefaultTrack: true,
     isPlaying: false,
     isMuted: true,
-    volume: 70,
+    volume: AUDIBLE_VOLUME,
     awaitingUserGesture: true,
     lastError: null,
   },
@@ -317,6 +321,12 @@ export function osReducer(state: OSState, action: Action): OSState {
           isMuted: false,
           awaitingUserGesture: false,
           isPlaying: true,
+          /* Unmuting into volume 0 is not unmuting. A stored 0 outlives the
+             session it was set in, and nothing else ever raises it, so the
+             site came back silent for good while the play button read
+             "playing" and the mute button read "unmuted". This gesture's
+             whole job is to make sound happen. */
+          volume: state.music.volume === 0 ? AUDIBLE_VOLUME : state.music.volume,
         },
       }
 
