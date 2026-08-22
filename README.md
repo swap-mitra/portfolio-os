@@ -25,7 +25,7 @@ Planning docs live in `specs/` (gitignored — local reference only, not part of
 | 5 — Music player | Done |
 | 6 — Apps (About/Projects/Resume/Contact/Terminal) | Done |
 | 7 — Accessibility & responsiveness | Done |
-| 8 — Quality & release | Not started |
+| 8 — Quality & release | SPIKE-31 done; SPIKE-32 needs a manual pass on the deployed site |
 
 `src/App.tsx` plays the boot sequence once, then mounts the real `Desktop`: animated neon
 drive scene, CRT scanlines, icons, Start Menu, windows, taskbar, and the music widget.
