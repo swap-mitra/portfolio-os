@@ -14,8 +14,14 @@ describe('runCommand', () => {
   })
 
   it('reads whoami and skills straight out of the about data', () => {
-    expect(runCommand('whoami').lines).toEqual([about.name, about.tagline])
+    const { lines } = runCommand('whoami')
+    expect(lines.slice(0, 2)).toEqual([about.name, about.tagline])
+    expect(lines.join('\n')).toContain(about.summary[0]!)
     expect(runCommand('skills').lines.join('\n')).toContain(about.skills[0]!)
+  })
+
+  it('clears the screen rather than printing anything', () => {
+    expect(runCommand('clear')).toEqual({ lines: [], clear: true })
   })
 
   it('prints every project', () => {

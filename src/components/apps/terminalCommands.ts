@@ -15,6 +15,8 @@ export interface CommandResult {
   lines: string[]
   /** Set only by a `play` whose argument parsed. */
   videoId?: string
+  /** `clear` empties the scrollback instead of appending to it. */
+  clear?: true
 }
 
 type Handler = (arg: string) => CommandResult
@@ -24,11 +26,12 @@ const out = (...lines: string[]): CommandResult => ({ lines })
 /** Name to blurb, in the order `help` prints them. Adding a command means
     adding it here and to `commands` below, so `help` can't go stale. */
 const HELP: Record<string, string> = {
-  help: 'this list',
-  whoami: 'who runs this machine',
-  skills: 'what it is stocked with',
-  projects: 'what it has built',
-  'play <url>': 'change the background track (YouTube URL or bare ID)',
+  help: 'show this list',
+  whoami: 'a short introduction',
+  skills: 'languages, frameworks, and tools',
+  projects: 'what I have built, with links',
+  'play <url>': 'play a YouTube track in the background',
+  clear: 'clear the screen',
 }
 
 const commands: Record<string, Handler> = {
@@ -38,7 +41,7 @@ const commands: Record<string, Handler> = {
       ...Object.entries(HELP).map(([name, blurb]) => `  ${name.padEnd(13)}${blurb}`),
     ),
 
-  whoami: () => out(about.name, about.tagline),
+  whoami: () => out(about.name, about.tagline, '', ...about.summary),
 
   skills: () => out(...about.skills.map((skill) => `  ${skill}`)),
 
@@ -47,6 +50,8 @@ const commands: Record<string, Handler> = {
      The Projects window is where the prose belongs. */
   projects: () =>
     out(...projects.flatMap((project) => [project.title, `  ${project.stack}`, `  ${project.link}`])),
+
+  clear: () => ({ lines: [], clear: true }),
 
   play: (arg) => {
     if (arg === '') return out('Usage: play <youtube-url>')

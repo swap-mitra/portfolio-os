@@ -1,14 +1,31 @@
-/* Bio copy for the About window, plus the skill list the terminal's `skills`
-   command prints (architecture.md §4). Sourced from the resume in
-   cvpilot's db.json, trimmed to what reads well in a 420px window.
+/* Bio copy for the About window, the short version the terminal's `whoami`
+   prints, and the skill list behind `skills` (architecture.md §4). Drawn
+   from the resume data in cvpilot's db.json and a LinkedIn summary, trimmed
+   to what reads well in a window this size.
 
    No interface in types/content.ts for this one: nothing else has to match
    its shape, so the inferred shape of the literal is the type. */
 export const about = {
   name: 'SWAPNIL MITRA',
-  tagline: 'Software Engineer // .NET, Azure, and AI-enabled systems',
-  /* Printed one per line by `skills` in the terminal, so each entry is a
-     whole line rather than a single skill. */
+  tagline: 'Software Engineer // Adrosonic, Mumbai',
+
+  /* `whoami` in the terminal. Kept to short lines on purpose: a terminal
+     that answers a one-word question with four paragraphs is a worse
+     terminal, and ABOUT_ME.TXT is right there for the long version. */
+  summary: [
+    'Software engineer, 3 years in. Full-stack, integration work, cloud',
+    'architecture, system design. Mostly .NET, Azure, React, TypeScript,',
+    'and lately more solution architecture than any single stack.',
+    '',
+    'More interested in why something needs building than in how, which',
+    'is usually the part that decides whether the how was worth it.',
+    '',
+    "Open ABOUT_ME.TXT for the long version. `skills` and `projects` work",
+    'from here too.',
+  ],
+
+  /* Printed one per line by `skills`, so each entry is a whole line rather
+     than a single skill. */
   skills: [
     'Languages:  JavaScript, TypeScript, C#, Python, SQL, Rust',
     'Frameworks: .NET Core, ASP.NET, React, Next.js, Fluent UI, LangChain',
@@ -17,10 +34,12 @@ export const about = {
     'Data:       PostgreSQL, pgvector, SQL Server, Prisma, Drizzle',
     'Ops:        Prometheus, Grafana, Git, Azure DevOps',
   ],
+
   paragraphs: [
-    'Software Engineer with 3+ years across system architecture, enterprise middleware integration, and AI-enabled tooling. Mostly .NET Core, Azure, RabbitMQ, and React, on distributed systems that have to stay up.',
-    'Currently Research and Innovation Engineer at Adrosonic, leading a team of four as Technical Lead on an enterprise broker management platform: SSO, then quote-bind, cancellation, and amendment flows, plus the Azure middleware layer carrying them out to downstream aggregators. Before that, a legacy COM Outlook add-in rebuilt as a React add-in for 10,000+ users.',
-    'Outside work: a local-first memory engine for AI agents written in Rust, a multi-tenant outreach workspace on Postgres and pgvector, a records governance platform pinning documents to IPFS, and a voice-first agricultural marketplace in eleven languages. B.Tech from IIT Kharagpur.',
-    'This desktop is real, by the way. Drag the windows, resize them from the corner, stack them. Or open TERMINAL.EXE and type help.',
+    'I build technology that solves real problems, not just technically elegant ones. Three years in, I have worn most of the hats: full-stack developer, integration engineer, cloud architect, system designer. What ties them together is wanting to understand why something needs to exist before working out how to build it.',
+    "Day to day that means React, TypeScript, C#, .NET, and Azure. Lately more of my attention has gone to solution architecture, designing systems that are practical now and do not quietly become someone else's problem in two years. Currently Research and Innovation Engineer at Adrosonic, leading a team of four on an enterprise broker management platform and the Azure middleware layer underneath it.",
+    'IIT Kharagpur gave me the foundation, but most of what I actually know came from getting things wrong, working out why, and doing it better the next time. That curiosity has only grown, mostly around AI, distributed systems, and what cloud infrastructure makes possible now that simply was not feasible a few years ago.',
+    'I do my best work close to both the business problem and the engineering solution: translating between the two, pushing back when something does not add up, and helping a team get from a fuzzy idea to something real and reliable. The messy collaborative parts of the job are as good as the clean satisfying ones.',
+    'This desktop is real, by the way. Drag the windows by their title bars, resize them from the corner, stack them up. Or open TERMINAL.EXE and type help.',
   ],
 }

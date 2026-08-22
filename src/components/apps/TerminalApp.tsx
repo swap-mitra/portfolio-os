@@ -32,8 +32,8 @@ export function TerminalApp() {
     const entered = input
     setInput('')
 
-    const { lines: output, videoId } = runCommand(entered)
-    setLines((prev) => [...prev, `> ${entered}`, ...output])
+    const { lines: output, videoId, clear } = runCommand(entered)
+    setLines((prev) => (clear === true ? [] : [...prev, `> ${entered}`, ...output]))
 
     if (entered.trim() !== '') {
       history.current = [...history.current, entered]
