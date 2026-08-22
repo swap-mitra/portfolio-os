@@ -3,15 +3,19 @@
    being scaffolded empty now. */
 
 /** Track that plays on first load, before a visitor pastes their own URL.
-    "Cartoon - On & On (feat. Daniel Levi)", an NCS release, whose whole
-    point is being free to use and spread.
+    "Netrum & Halvorsen - Phoenix", an NCS release: synthwave, instrumental,
+    and licensed for exactly this use. Instrumental on purpose, since a
+    vocal track competes with reading the windows.
+
+    Alternative, verified the same way: `VrDD2GSNs_I` (Anna Yvette - Red
+    Line, 265s, has vocals). Swapping is this one line.
 
     Embeddability is a property of the upload and the owner can revoke it at
     any time, so this constant rots on its own. Two IDs have already died
     here: `6aouLxiL4Cw`, and Kavinsky's "Nightcall" (`MV_3Dpw-BRY`), whose
     label allows the video on YouTube but not on other sites. Both report
-    **error 150**. Don't swap in a reupload to get around that; the rights
-    holder turned embedding off on purpose.
+    **error 150**. Don't swap in a reupload or a self-hosted rip to get
+    around that; the rights holder turned embedding off on purpose.
 
     No server-side probe can tell you which is which: the oEmbed endpoint
     returns 200 for a video with embedding disabled, and the watch page
@@ -20,8 +24,22 @@
     them is playing the video in a real player at a real origin and then
     waiting: an unembeddable video reports a 0s duration and errors a moment
     after it says it's ready. This ID was checked that way, in headless
-    Chrome against the dev server, and played 208s. */
-export const DEFAULT_VIDEO_ID = 'K4DyBUG242c'
+    Chrome against the dev server, and played 238s. */
+export const DEFAULT_VIDEO_ID = 'yH88qRmgkGI'
+
+/** Attribution for the default track, shown while it is the one playing.
+
+    Not decoration: NCS licenses its catalogue for free use on the condition
+    that you credit the artist, the track, and NCS, and link back to the
+    original upload. The widget said only "DEFAULT TRACK" before, which met
+    none of that, and the default was already an NCS release. A visitor's own
+    pasted track gets no credit line, because we know nothing about it. */
+export const DEFAULT_TRACK_CREDIT = {
+  artist: 'Netrum & Halvorsen',
+  title: 'Phoenix',
+  label: 'NCS',
+  url: 'https://www.youtube.com/watch?v=yH88qRmgkGI',
+}
 
 /** Contact details for the Contact window (SPIKE-26). The phone number on
     the resume is deliberately not here: the PDF is a deliberate hand-off, a
