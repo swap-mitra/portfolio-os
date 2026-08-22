@@ -6,6 +6,7 @@ import './Window.css'
 import { useEffect, useRef } from 'react'
 import { useOS } from '../state/osContext'
 import { focusById, iconId, taskbarTabId } from './focusIds'
+import { currentViewport } from './viewport'
 import { useDraggable } from '../hooks/useDraggable'
 import { useResizable } from '../hooks/useResizable'
 import { MIN_HEIGHT, MIN_WIDTH } from '../state/osReducer'
@@ -102,11 +103,7 @@ export function Window({ window: win }: { window: WindowState }) {
           <button
             aria-label="maximize"
             onClick={() =>
-              dispatch({
-                type: 'TOGGLE_MAXIMIZE',
-                id: win.id,
-                viewport: { width: window.innerWidth, height: window.innerHeight },
-              })
+              dispatch({ type: 'TOGGLE_MAXIMIZE', id: win.id, viewport: currentViewport() })
             }
           >
             &#9633;
@@ -117,8 +114,12 @@ export function Window({ window: win }: { window: WindowState }) {
         </div>
       </div>
       <div className="window-body">{APP_BODIES[win.appType]}</div>
+      {/* Ported from the mockup's #resize-handle, which never made it across
+          in SPIKE-07: without the glyph this is an invisible 14px square and
+          the window reads as un-resizable. */}
       <div
         className="resize-handle"
+        aria-hidden="true"
         onPointerDown={(e) => {
           focus()
           resize.onPointerDown(e)
@@ -126,7 +127,16 @@ export function Window({ window: win }: { window: WindowState }) {
         onPointerMove={resize.onPointerMove}
         onPointerUp={resize.onPointerUp}
         onPointerCancel={resize.onPointerCancel}
-      />
+      >
+        <svg viewBox="0 0 10 10" shapeRendering="crispEdges">
+          <rect x="7" y="1" width="2" height="2" fill="var(--cyan)" />
+          <rect x="4" y="4" width="2" height="2" fill="var(--cyan)" />
+          <rect x="7" y="4" width="2" height="2" fill="var(--cyan)" />
+          <rect x="1" y="7" width="2" height="2" fill="var(--cyan)" />
+          <rect x="4" y="7" width="2" height="2" fill="var(--cyan)" />
+          <rect x="7" y="7" width="2" height="2" fill="var(--cyan)" />
+        </svg>
+      </div>
     </div>
   )
 }
