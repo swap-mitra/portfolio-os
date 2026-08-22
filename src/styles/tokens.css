@@ -26,8 +26,16 @@
   /* Height the music widget occupies above the taskbar on a small screen.
      A shared contract for the same reason --taskbar-height is: the
      fullscreen window in responsive.css stops here so the mute control
-     stays reachable (architecture.md §10). */
-  --music-bar-height: 96px;
+     stays reachable (architecture.md §10).
+
+     Measured, not guessed: the widget rests at 98px (transport row, URL row,
+     track credit) plus a 6px gap. It grows to 137px while an error message
+     is showing, and that case is deliberately not reserved for. An error is
+     transient and the widget paints above the window anyway, so it briefly
+     covers the bottom of a scrollable body. Reserving for it would cost
+     every visitor 40px of window on every screen, permanently, for a message
+     most will never see. Re-measure if the widget gains a row. */
+  --music-bar-height: 108px;
 
   /* Layer stack, back to front (architecture.md §6). Named so components
      can't drift out of agreement about who sits above whom. */

@@ -84,3 +84,24 @@
 .music-error {
   color: var(--magenta);
 }
+
+/* Attribution for the default track (NCS licence terms, see siteConfig.ts).
+   Quiet but legible: it is a condition of use, not a caption. */
+.music-credit {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.2;
+  color: var(--paper);
+  opacity: 0.75;
+}
+
+.music-credit a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.music-credit a:hover,
+.music-credit a:focus-visible {
+  opacity: 1;
+  text-decoration: underline;
+}

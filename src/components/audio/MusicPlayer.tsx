@@ -10,7 +10,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import './MusicPlayer.css'
 import { useOS } from '../../state/osContext'
-import { DEFAULT_VIDEO_ID } from '../../data/siteConfig'
+import { DEFAULT_TRACK_CREDIT, DEFAULT_VIDEO_ID } from '../../data/siteConfig'
 import { ENDED, PARSE_ERROR, PAUSED, PLAYING, extractVideoId, playerErrorMessage } from './musicUtils'
 import type { YTApi, YTPlayer } from '../../types/youtube'
 
@@ -214,6 +214,15 @@ export function MusicPlayer() {
           LOAD
         </button>
       </form>
+
+      {music.isDefaultTrack && (
+        <p className="music-credit">
+          <a href={DEFAULT_TRACK_CREDIT.url} target="_blank" rel="noopener noreferrer">
+            {DEFAULT_TRACK_CREDIT.artist} - {DEFAULT_TRACK_CREDIT.title} [
+            {DEFAULT_TRACK_CREDIT.label}]
+          </a>
+        </p>
+      )}
 
       {music.awaitingUserGesture && (
         <p className="music-note">🔈 click anywhere to unmute</p>
