@@ -1,0 +1,91 @@
+/* Small-screen layout (project-spec.md FR11, SPIKE-30).
+
+   768px, the value architecture.md §10 suggested, kept after checking it
+   against emulated devices: it sits above every phone in portrait and below a
+   tablet in landscape, which is the line where a floating window stops making
+   sense. The same number lives in useIsMobile.ts, which decides whether the
+   drag and resize handlers are attached at all. Changing one without the
+   other gives you a window that looks fullscreen and still drags.
+
+   Every selector here is prefixed with `.desktop` to outrank the component
+   stylesheet it is overriding. Media queries add no specificity, and Vite
+   injects component CSS after the two global sheets main.tsx imports, so an
+   unprefixed `.music-player` here loses to the one in MusicPlayer.css on
+   source order alone. Measured: the widget kept its 250px width. */
+
+@media (max-width: 768px) {
+  /* Windows stop floating and fill everything the chrome is not using.
+
+     `fixed`, not `absolute`: .window-manager is a zero-height box (its only
+     children are absolutely positioned), so insets resolved against it gave a
+     window 200px tall, which is the min-height and nothing to do with the
+     screen. The viewport is the thing worth measuring against here.
+
+     The music widget keeps its corner rather than being hidden, because §10
+     requires the mute control to stay reachable, so the window stops above
+     it instead of underneath it. */
+  .desktop .window--fullscreen {
+    position: fixed;
+    inset: 0 0 calc(var(--taskbar-height) + var(--music-bar-height)) 0;
+    width: auto;
+    height: auto;
+    border-width: 0 0 2px 0;
+  }
+
+  /* The wordmark sits at --z-wordmark, above the window layer, so a
+     fullscreen window renders underneath it and the close button comes out
+     stamped through "PORTFOLIO-OS". Decorative branding loses to the only
+     control the window has. */
+  .desktop .wordmark {
+    display: none;
+  }
+
+  /* Nothing to grab, so stop advertising a grab. */
+  .desktop .window--fullscreen .window-titlebar {
+    cursor: default;
+    padding: 10px;
+  }
+
+  /* One close button now, and a thumb needs more than 19px of it. */
+  .desktop .window--fullscreen .window-btns button {
+    width: 30px;
+    height: 30px;
+    font-size: 10px;
+  }
+
+  /* A single 74px column wastes a narrow screen and runs off a short one. */
+  .desktop .icon-grid {
+    right: 16px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 14px 10px;
+  }
+
+  /* Full width above the taskbar: 250px pinned right leaves a dead gutter,
+     and the URL field is unusable at that size. */
+  .desktop .music-player {
+    left: 8px;
+    right: 8px;
+    bottom: calc(var(--taskbar-height) + 6px);
+    width: auto;
+  }
+
+  /* Tabs accumulate faster than a phone has width for. */
+  .desktop .taskbar {
+    gap: 6px;
+    padding: 0 6px;
+    overflow-x: auto;
+  }
+
+  .desktop .taskbar-tab {
+    flex-shrink: 0;
+    font-size: 8px;
+    padding: 8px;
+  }
+
+  .desktop .clock {
+    margin-left: auto;
+    flex-shrink: 0;
+    font-size: 8px;
+  }
+}

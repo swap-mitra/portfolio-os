@@ -9,6 +9,7 @@ import { focusById, iconId, taskbarTabId } from './focusIds'
 import { currentViewport } from './viewport'
 import { useDraggable } from '../hooks/useDraggable'
 import { useResizable } from '../hooks/useResizable'
+import { useIsMobile } from '../hooks/useIsMobile'
 import { MIN_HEIGHT, MIN_WIDTH } from '../state/osReducer'
 import type { ReactNode } from 'react'
 import type { AppType, WindowState } from '../types/os'
@@ -46,6 +47,11 @@ const APP_BODIES: Record<AppType, ReactNode> = {
 export function Window({ window: win }: { window: WindowState }) {
   const { dispatch } = useOS()
   const windowRef = useRef<HTMLDivElement>(null)
+  /* Below the breakpoint an app fills the screen and stops being draggable
+     (FR11, SPIKE-30). Handled here rather than only in CSS because the
+     handlers themselves have to come off: a window that looks fullscreen but
+     still responds to a drag is worse than one that never claimed to. */
+  const isMobile = useIsMobile()
 
   const focus = () => dispatch({ type: 'FOCUS_WINDOW', id: win.id })
 
@@ -87,27 +93,39 @@ export function Window({ window: win }: { window: WindowState }) {
   return (
     <div
       ref={windowRef}
-      className="window"
+      className={isMobile ? 'window window--fullscreen' : 'window'}
       /* Focusable but not tab-reachable: focus is moved here deliberately
          when the window opens, and Tab should walk the controls inside it. */
       tabIndex={-1}
-      style={{ left: win.x, top: win.y, width: win.width, height: win.height, zIndex: win.zIndex }}
+      /* Fullscreen windows are placed by the stylesheet; only the stacking
+         order still matters, so the topmost one is the one on screen. */
+      style={
+        isMobile
+          ? { zIndex: win.zIndex }
+          : { left: win.x, top: win.y, width: win.width, height: win.height, zIndex: win.zIndex }
+      }
       onPointerDown={focus}
     >
-      <div className="window-titlebar pixel" {...drag}>
+      <div className="window-titlebar pixel" {...(isMobile ? {} : drag)}>
         <span>{APP_LABELS[win.appType]}</span>
         <div className="window-btns">
-          <button aria-label="minimize" onClick={minimize}>
-            _
-          </button>
-          <button
-            aria-label="maximize"
-            onClick={() =>
-              dispatch({ type: 'TOGGLE_MAXIMIZE', id: win.id, viewport: currentViewport() })
-            }
-          >
-            &#9633;
-          </button>
+          {/* Minimize and maximize mean nothing to a window that already
+              fills the screen; close is the back control (FR11). */}
+          {!isMobile && (
+            <>
+              <button aria-label="minimize" onClick={minimize}>
+                _
+              </button>
+              <button
+                aria-label="maximize"
+                onClick={() =>
+                  dispatch({ type: 'TOGGLE_MAXIMIZE', id: win.id, viewport: currentViewport() })
+                }
+              >
+                &#9633;
+              </button>
+            </>
+          )}
           <button aria-label="close" onClick={close}>
             X
           </button>
@@ -116,7 +134,9 @@ export function Window({ window: win }: { window: WindowState }) {
       <div className="window-body">{APP_BODIES[win.appType]}</div>
       {/* Ported from the mockup's #resize-handle, which never made it across
           in SPIKE-07: without the glyph this is an invisible 14px square and
-          the window reads as un-resizable. */}
+          the window reads as un-resizable. There is nothing to resize to on
+          a phone, so it is not rendered there at all. */}
+      {!isMobile && (
       <div
         className="resize-handle"
         aria-hidden="true"
@@ -137,6 +157,7 @@ export function Window({ window: win }: { window: WindowState }) {
           <rect x="7" y="7" width="2" height="2" fill="var(--cyan)" />
         </svg>
       </div>
+      )}
     </div>
   )
 }

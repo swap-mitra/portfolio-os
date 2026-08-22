@@ -23,6 +23,12 @@
      it, and would float or hide behind it if the two drifted apart (SPIKE-14). */
   --taskbar-height: 44px;
 
+  /* Height the music widget occupies above the taskbar on a small screen.
+     A shared contract for the same reason --taskbar-height is: the
+     fullscreen window in responsive.css stops here so the mute control
+     stays reachable (architecture.md §10). */
+  --music-bar-height: 96px;
+
   /* Layer stack, back to front (architecture.md §6). Named so components
      can't drift out of agreement about who sits above whom. */
   --z-cityscape: 0;
