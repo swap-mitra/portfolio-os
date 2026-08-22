@@ -3,7 +3,9 @@
    SPIKE-08; the three title-bar buttons are SPIKE-09. */
 
 import './Window.css'
+import { useEffect, useRef } from 'react'
 import { useOS } from '../state/osContext'
+import { focusById, iconId, taskbarTabId } from './focusIds'
 import { useDraggable } from '../hooks/useDraggable'
 import { useResizable } from '../hooks/useResizable'
 import { MIN_HEIGHT, MIN_WIDTH } from '../state/osReducer'
@@ -42,8 +44,32 @@ const APP_BODIES: Record<AppType, ReactNode> = {
 
 export function Window({ window: win }: { window: WindowState }) {
   const { dispatch } = useOS()
+  const windowRef = useRef<HTMLDivElement>(null)
 
   const focus = () => dispatch({ type: 'FOCUS_WINDOW', id: win.id })
+
+  /* A window that just opened takes focus, so Tab continues into it rather
+     than on through the icon grid (SPIKE-28). Guarded because an app may
+     have focused something inside itself already: the terminal focuses its
+     prompt, and child effects run before this one. */
+  useEffect(() => {
+    const el = windowRef.current
+    if (el !== null && !el.contains(document.activeElement)) el.focus()
+  }, [])
+
+  /* Both of these buttons delete the element they were clicked on, and a
+     removed focused element drops focus to <body>. Moving focus first and
+     dispatching second means there is never a frame with nothing focused. */
+  const close = () => {
+    focusById(iconId(win.appType))
+    dispatch({ type: 'CLOSE_WINDOW', id: win.id })
+  }
+
+  const minimize = () => {
+    // The tab is where the window went, so it's where focus should follow.
+    focusById(taskbarTabId(win.id))
+    dispatch({ type: 'MINIMIZE_WINDOW', id: win.id })
+  }
 
   const drag = useDraggable(
     (x, y) => dispatch({ type: 'MOVE_WINDOW', id: win.id, x, y }),
@@ -59,14 +85,18 @@ export function Window({ window: win }: { window: WindowState }) {
 
   return (
     <div
+      ref={windowRef}
       className="window"
+      /* Focusable but not tab-reachable: focus is moved here deliberately
+         when the window opens, and Tab should walk the controls inside it. */
+      tabIndex={-1}
       style={{ left: win.x, top: win.y, width: win.width, height: win.height, zIndex: win.zIndex }}
       onPointerDown={focus}
     >
       <div className="window-titlebar pixel" {...drag}>
         <span>{APP_LABELS[win.appType]}</span>
         <div className="window-btns">
-          <button aria-label="minimize" onClick={() => dispatch({ type: 'MINIMIZE_WINDOW', id: win.id })}>
+          <button aria-label="minimize" onClick={minimize}>
             _
           </button>
           <button
@@ -81,7 +111,7 @@ export function Window({ window: win }: { window: WindowState }) {
           >
             &#9633;
           </button>
-          <button aria-label="close" onClick={() => dispatch({ type: 'CLOSE_WINDOW', id: win.id })}>
+          <button aria-label="close" onClick={close}>
             X
           </button>
         </div>

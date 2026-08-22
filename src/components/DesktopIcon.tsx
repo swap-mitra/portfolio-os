@@ -2,6 +2,7 @@
    (project-spec.md FR2, SPIKE-10). */
 
 import { PixelIcon } from './icons/PixelIcon'
+import { iconId } from './focusIds'
 import type { AppType } from '../types/os'
 
 export function DesktopIcon({
@@ -19,6 +20,7 @@ export function DesktopIcon({
 }) {
   return (
     <div
+      id={iconId(appType)}
       className={`icon${selected ? ' selected' : ''}`}
       role="button"
       tabIndex={0}

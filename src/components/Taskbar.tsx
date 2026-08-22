@@ -6,6 +6,7 @@ import './Taskbar.css'
 import { useOS } from '../state/osContext'
 import { useClock } from '../hooks/useClock'
 import { APP_LABELS } from './Window'
+import { START_BUTTON_ID, taskbarTabId } from './focusIds'
 
 export function Taskbar() {
   const { state, dispatch } = useOS()
@@ -14,6 +15,7 @@ export function Taskbar() {
   return (
     <div className="taskbar">
       <button
+        id={START_BUTTON_ID}
         className="start-btn pixel"
         aria-expanded={state.startMenuOpen}
         onClick={() => dispatch({ type: 'TOGGLE_START_MENU' })}
@@ -23,6 +25,7 @@ export function Taskbar() {
       {Object.values(state.windows).map((w) => (
         <button
           key={w.id}
+          id={taskbarTabId(w.id)}
           className={`taskbar-tab pixel${w.id === state.focusedWindowId ? ' active' : ''}`}
           onClick={() => dispatch({ type: 'RESTORE_WINDOW', id: w.id })}
         >
