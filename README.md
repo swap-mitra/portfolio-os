@@ -22,13 +22,23 @@ Planning docs live in `specs/` (gitignored — local reference only, not part of
 | 3 — Desktop shell (icons, Start Menu, taskbar chrome, boot screen) | Done |
 | 4 — Live background (cityscape parallax, car, starfield, scanlines, reduced motion) | Done |
 | 5 — Music player | Done |
-| 6 — Apps (About/Projects/Resume/Contact/Terminal) | Not started |
+| 6 — Apps (About/Projects/Resume/Contact/Terminal) | Done |
 | 7 — Accessibility | Not started |
 | 8 — Quality & release | Not started |
 
 `src/App.tsx` plays the boot sequence once, then mounts the real `Desktop`: animated neon
 cityscape, driving car, starfield, CRT scanlines, icons, Start Menu, windows, taskbar, and the
-music widget. Real app content still lands in Phase 6.
+music widget.
+
+All five windows render real content. About and Projects read their copy from `src/data/`,
+Contact reads `siteConfig.ts`, Resume previews `public/resume.pdf` inline with a download button
+beside it, and Terminal runs a small hardcoded command set (`help`, `whoami`, `skills`,
+`projects`, and `play <youtube-url>`, which swaps the background track through the same action
+the music widget's URL box dispatches).
+
+Everything except the resume PDF is still placeholder copy. The bio, the three projects, and the
+contact links all need replacing before launch, and each of them lives in exactly one file under
+`src/data/`.
 
 The background is CSS/SVG parallax with no per-frame JavaScript, it freezes under
 `prefers-reduced-motion`, and it stops entirely in a backgrounded tab.
