@@ -81,7 +81,6 @@ export function MusicPlayer() {
                blocked everywhere, and a blocked play() means no playback at
                all rather than silent playback (§8.3). */
             e.target.mute()
-            e.target.setVolume(music.volume)
             e.target.playVideo()
             setReady(true)
           },
@@ -107,9 +106,19 @@ export function MusicPlayer() {
     return () => {
       cancelled = true
     }
-    // Deliberately not depending on music.volume: it's read once here to seed
-    // the player, has its own sync effect below, and listing it would rebuild
-    // the player on every drag of the slider.
+    /* This effect must not depend on anything that changes while it runs.
+       The guard on the first line returns early once playerRef.current is
+       set, but that pointer stays null for the whole of the loadIframeApi()
+       round trip, so a re-run in that window would sail past the guard and
+       construct a SECOND YT.Player: two iframes, both playing, one of them
+       unreachable.
+
+       It used to seed the player's volume here, which put music.volume in
+       that position and made dragging the slider during those few hundred
+       milliseconds the way to hit it. Nothing seeds volume now: onReady only
+       flips `ready`, and the sync effect below owns volume from that point,
+       running on the same flip. One owner, no duplicate call, no dependency
+       to argue about. */
   }, [music.videoId, dispatch])
 
   /* First interaction anywhere on the page unmutes (§8.3). Deliberately on
