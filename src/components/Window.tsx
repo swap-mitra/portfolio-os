@@ -19,6 +19,7 @@ import { ContactApp } from './apps/ContactApp'
 import { ResumeApp } from './apps/ResumeApp'
 import { TerminalApp } from './apps/TerminalApp'
 import { RecycleBinApp } from './apps/RecycleBinApp'
+import { MinesweeperApp } from './apps/MinesweeperApp'
 
 /* Placeholder labels until siteConfig.ts (Phase 6) supplies real copy —
    reused by Taskbar so tab and title-bar text never drift apart. A separate
@@ -32,6 +33,7 @@ export const APP_LABELS: Record<AppType, string> = {
   contact: 'CONTACT.EXE',
   terminal: 'TERMINAL.EXE',
   recyclebin: 'RECYCLE_BIN',
+  minesweeper: 'MINESWEEPER.EXE',
 }
 
 /* Elements rather than component references because none of them take props,
@@ -45,6 +47,7 @@ const APP_BODIES: Record<AppType, ReactNode> = {
   resume: <ResumeApp />,
   terminal: <TerminalApp />,
   recyclebin: <RecycleBinApp />,
+  minesweeper: <MinesweeperApp />,
 }
 
 export function Window({ window: win }: { window: WindowState }) {

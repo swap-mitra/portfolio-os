@@ -1,7 +1,9 @@
 /* localStorage persistence (architecture.md §3).
 
    Scope decision from SPIKE-05: the visitor's **music preferences persist,
-   window layout does not**. Restoring windows would mean a returning visitor
+   window layout does not**. Minesweeper best times persist too, under their
+   own key, for the same reason music does: they are small, viewport-
+   independent, and worthless to a visitor if thrown away every visit. Restoring windows would mean a returning visitor
    lands on a desktop already buried under windows, never seeing the desktop
    the whole design is built around — and saved coordinates are viewport-
    relative, so a layout saved on a wide monitor reopens off-screen on a
@@ -15,11 +17,14 @@
    visitor must never get a broken desktop because of it. */
 
 import type { MusicState, OSState } from '../types/os'
+import { LEVELS } from '../components/apps/minesweeper'
+import type { LevelName } from '../components/apps/minesweeper'
 import { initialState } from './osReducer'
 
 /* Schema version lives in the key, so a future shape change just moves to
-   :v2 and stale v1 data is ignored — no migration code to write. */
+   :v2 and stale v1 data is ignored, with no migration code to write. */
 const KEY = 'portfolio-os:music:v1'
+const BEST_TIMES_KEY = 'portfolio-os:minesweeper:v1'
 
 const SAVE_DEBOUNCE_MS = 300
 
@@ -39,8 +44,8 @@ interface PersistedMusic {
     because this value gets handed to `loadVideoById`. */
 const VIDEO_ID = /^[A-Za-z0-9_-]{11}$/
 
-/** Accessing localStorage can itself throw — Safari private mode and blocked
-    cookies both do it — so even the lookup is guarded. */
+/** Accessing localStorage can itself throw (Safari private mode and blocked
+    cookies both do it), so even the lookup is guarded. */
 function storage(): Storage | null {
   try {
     return globalThis.localStorage ?? null
@@ -165,4 +170,60 @@ export function clearPersistedState(): void {
   } catch {
     // Nothing useful to do.
   }
+}
+
+/* Minesweeper best times, in seconds, keyed by level name.
+
+   Kept here rather than in minesweeper.ts because that module is pure and
+   worth keeping that way, and because this file already owns the rules for
+   reading untrusted stored data. Same discipline as the music blob: every
+   field is validated on the way in, and anything unrecognised is dropped
+   rather than trusted into the UI. */
+
+export type BestTimes = Partial<Record<LevelName, number>>
+
+/** A time is only usable if it is a whole, positive, plausible number of
+    seconds. `999` is what the readout clamps to, so nothing above it can
+    even be displayed. */
+const isUsableTime = (value: unknown): value is number =>
+  typeof value === 'number' && Number.isInteger(value) && value > 0 && value <= 999
+
+export function loadBestTimes(): BestTimes {
+  const store = storage()
+  if (store === null) return {}
+
+  let parsed: unknown
+  try {
+    const raw = store.getItem(BEST_TIMES_KEY)
+    if (raw === null) return {}
+    parsed = JSON.parse(raw)
+  } catch {
+    return {}
+  }
+  if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) return {}
+
+  const record = parsed as Record<string, unknown>
+  const result: BestTimes = {}
+  for (const [level, value] of Object.entries(record)) {
+    // Keys are as untrusted as values: a hand-edited blob can name a level
+    // that doesn't exist, and it has no business reaching the UI.
+    if (level in LEVELS && isUsableTime(value)) result[level as LevelName] = value
+  }
+  return result
+}
+
+/** Record `seconds` if it beats the stored time for that level. Returns the
+    times as they now stand, so the caller can render without a second read. */
+export function saveBestTime(level: LevelName, seconds: number): BestTimes {
+  const current = loadBestTimes()
+  const previous = current[level]
+  if (!isUsableTime(seconds) || (previous !== undefined && previous <= seconds)) return current
+
+  const updated = { ...current, [level]: seconds }
+  try {
+    storage()?.setItem(BEST_TIMES_KEY, JSON.stringify(updated))
+  } catch {
+    // Losing a high score is not worth breaking the game over.
+  }
+  return updated
 }

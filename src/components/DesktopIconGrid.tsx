@@ -16,6 +16,7 @@ const APP_ORDER: AppType[] = [
   'contact',
   'terminal',
   'recyclebin',
+  'minesweeper',
 ]
 
 export function DesktopIconGrid() {

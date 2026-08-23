@@ -45,6 +45,17 @@ const SHAPES: Record<AppType, ReactNode> = {
       <rect x="5.7" y="3.6" width="0.9" height="4.2" fill="var(--ink)" />
     </>
   ),
+  /* A mine: round body, four spikes, and the glint the original's bitmap
+     had. Reads at 34px on the desktop and at 22px in a window. */
+  minesweeper: (
+    <>
+      <rect x="4.5" y="0.5" width="1" height="9" fill="var(--paper)" />
+      <rect x="0.5" y="4.5" width="9" height="1" fill="var(--paper)" />
+      <rect x="3" y="2" width="4" height="6" fill="var(--paper)" />
+      <rect x="2" y="3" width="6" height="4" fill="var(--paper)" />
+      <rect x="3.5" y="3.5" width="1.2" height="1.2" fill="var(--ink)" />
+    </>
+  ),
   terminal: (
     <>
       <rect x="1" y="1" width="8" height="8" fill="var(--cyan)" />

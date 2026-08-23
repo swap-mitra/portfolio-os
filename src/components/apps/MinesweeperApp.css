@@ -1,0 +1,201 @@
+/* Minesweeper, in the desktop's palette rather than Win95 grey. The board is
+   a CSS grid whose column count comes from the game, so a level change is a
+   data change and not a stylesheet change. */
+
+.ms {
+  /* Sized off the viewport so the 16-wide board never overflows a phone,
+     where the window is the whole screen. Capped at the size it was drawn
+     for, so a wide monitor doesn't get a comically large board. */
+  --ms-cell: clamp(16px, 5vw, 26px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.ms-levels {
+  display: flex;
+  gap: 8px;
+}
+
+.ms-level {
+  background: var(--ink-2);
+  color: var(--paper);
+  border: 1px solid var(--ink-3);
+  font: inherit;
+  font-size: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+}
+
+.ms-level:hover,
+.ms-level:focus-visible {
+  border-color: var(--cyan);
+  color: var(--cyan);
+}
+
+.ms-level--on {
+  background: var(--cyan);
+  border-color: var(--cyan);
+  color: var(--ink);
+}
+
+/* Header and grid stretch to whichever is wider, so the counters sit exactly
+   over the board at both levels instead of overhanging the 9-wide one. */
+.ms-board {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Mine counter, face, timer: the original's three-part header, which is the
+   one piece of its chrome worth keeping verbatim. */
+.ms-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 6px 10px;
+  background: var(--ink-2);
+  border: 1px solid var(--ink-3);
+}
+
+.ms-gauge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.ms-gauge-label {
+  font-size: 7px;
+  color: var(--paper);
+  opacity: 0.45;
+  letter-spacing: 1px;
+}
+
+.ms-readout {
+  font-size: 14px;
+  color: var(--magenta);
+  /* Tabular by construction: every glyph in this font is one cell wide, so
+     the counters don't jitter as the digits change. */
+  letter-spacing: 1px;
+}
+
+.ms-face {
+  background: var(--ink-3);
+  border: 1px solid var(--cyan);
+  color: var(--yellow);
+  font: inherit;
+  font-size: 12px;
+  padding: 5px 9px;
+  cursor: pointer;
+}
+
+.ms-face:hover,
+.ms-face:focus-visible {
+  background: var(--cyan);
+  color: var(--ink);
+}
+
+.ms-grid {
+  display: grid;
+  gap: 1px;
+  background: var(--ink-3);
+  padding: 1px;
+  border: 1px solid var(--ink-3);
+}
+
+.ms-cell {
+  width: var(--ms-cell);
+  height: var(--ms-cell);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ink-2);
+  border: 1px solid #2a2a52;
+  border-top-color: #3a3a6e;
+  border-left-color: #3a3a6e;
+  color: var(--paper);
+  font-family: var(--font-display);
+  font-size: 10px;
+  padding: 0;
+  cursor: pointer;
+  /* A double-tap on a phone should flag or reveal, never zoom the desktop. */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ms-cell:hover {
+  background: var(--ink-3);
+}
+
+.ms-cell:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: -2px;
+}
+
+/* An opened cell loses its bevel: flat and darker, so the swept area reads
+   as a hole in the board rather than another button. */
+.ms-cell--open {
+  background: var(--ink);
+  border-color: var(--ink);
+  cursor: default;
+}
+
+/* Four accents for eight numbers, so the low counts a visitor actually reads
+   every game are the ones with distinct colours. */
+.ms-cell[data-adjacent='1'] { color: var(--cyan); }
+.ms-cell[data-adjacent='2'] { color: var(--green); }
+.ms-cell[data-adjacent='3'] { color: var(--magenta); }
+.ms-cell[data-adjacent='4'] { color: var(--yellow); }
+.ms-cell[data-adjacent='5'] { color: var(--magenta); }
+.ms-cell[data-adjacent='6'] { color: var(--cyan); }
+.ms-cell[data-adjacent='7'] { color: var(--paper); }
+.ms-cell[data-adjacent='8'] { color: var(--paper); }
+
+.ms-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+}
+
+.ms-flagmode {
+  background: var(--ink-2);
+  border: 1px solid var(--ink-3);
+  color: var(--paper);
+  font: inherit;
+  font-size: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.ms-flagmode--on {
+  background: var(--magenta);
+  border-color: var(--magenta);
+  color: var(--ink);
+}
+
+.ms-hint,
+.ms-best {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.3;
+  color: var(--paper);
+  opacity: 0.7;
+}
+
+.ms-best {
+  color: var(--green);
+  opacity: 0.85;
+}
+
+/* Nothing to brag about yet, so it recedes instead of sitting there in the
+   same green as a real score. */
+.ms-best--empty {
+  color: var(--paper);
+  opacity: 0.45;
+}

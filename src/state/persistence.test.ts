@@ -2,7 +2,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   clearPersistedState,
   hydrateInitialState,
+  loadBestTimes,
   loadMusicState,
+  saveBestTime,
   saveMusicState,
   saveMusicStateNow,
 } from './persistence'
@@ -215,5 +217,45 @@ describe('debounced save', () => {
 
     vi.advanceTimersByTime(300)
     expect(JSON.parse(map.get(KEY)!).volume).toBe(60)
+  })
+})
+
+describe('minesweeper best times', () => {
+  it('stores a first result and reads it back', () => {
+    expect(loadBestTimes()).toEqual({})
+    expect(saveBestTime('BEGINNER', 42)).toEqual({ BEGINNER: 42 })
+    expect(loadBestTimes()).toEqual({ BEGINNER: 42 })
+  })
+
+  it('keeps the faster time and leaves the other levels alone', () => {
+    saveBestTime('BEGINNER', 42)
+    saveBestTime('EXPERT', 300)
+    expect(saveBestTime('BEGINNER', 90)).toEqual({ BEGINNER: 42, EXPERT: 300 })
+    expect(saveBestTime('BEGINNER', 12)).toEqual({ BEGINNER: 12, EXPERT: 300 })
+    expect(loadBestTimes()).toEqual({ BEGINNER: 12, EXPERT: 300 })
+  })
+
+  it('refuses times the readout could not show, rather than storing junk', () => {
+    for (const bad of [0, -1, 1.5, 1000, Number.NaN]) {
+      expect(saveBestTime('BEGINNER', bad)).toEqual({})
+    }
+    expect(loadBestTimes()).toEqual({})
+  })
+
+  it('drops hand-edited entries instead of trusting them into the UI', () => {
+    map.set(
+      'portfolio-os:minesweeper:v1',
+      JSON.stringify({ BEGINNER: 30, EXPERT: 'fast', GODMODE: 1 }),
+    )
+    expect(loadBestTimes()).toEqual({ BEGINNER: 30 })
+  })
+
+  it('still reports the score for the session when storage is unavailable', () => {
+    vi.unstubAllGlobals()
+    expect(loadBestTimes()).toEqual({})
+    // The write is dropped, but the visitor still sees what they just scored.
+    // Refusing to show it as well as refusing to keep it helps nobody.
+    expect(saveBestTime('BEGINNER', 10)).toEqual({ BEGINNER: 10 })
+    expect(loadBestTimes()).toEqual({})
   })
 })

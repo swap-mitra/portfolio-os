@@ -22,6 +22,7 @@ export const OPEN_SIZE: Record<AppType, { width: number; height: number }> = {
   contact: { width: 520, height: 280 },
   terminal: { width: 700, height: 470 },
   recyclebin: { width: 680, height: 530 },
+  minesweeper: { width: 500, height: 620 },
 }
 
 /** Breathing room kept between a freshly opened window and the viewport edge. */
