@@ -29,6 +29,17 @@ interface PastedTrack {
   title: string
 }
 
+/** `getVideoData` is undocumented, and this runs inside YouTube's own event
+    dispatch, where a throw would take the rest of the handler with it. A
+    missing title is worth nothing; a broken player is worth less. */
+function readVideoData(player: YTPlayer): { video_id?: string; title?: string } | undefined {
+  try {
+    return player.getVideoData?.()
+  } catch {
+    return undefined
+  }
+}
+
 function loadIframeApi(): Promise<YTApi> {
   apiPromise ??= new Promise<YTApi>((resolve) => {
     if (window.YT?.Player !== undefined) {
@@ -52,6 +63,10 @@ export function MusicPlayer() {
   const hostRef = useRef<HTMLDivElement>(null)
   const playerRef = useRef<YTPlayer | null>(null)
   const loadedId = useRef<string | null>(null)
+  /* True from asking for a new track until the player reports it playing.
+     Swapping a track emits a transient PAUSED on the way through, and taking
+     that as the truth is what left the next track sitting paused. */
+  const swapping = useRef(false)
   const [ready, setReady] = useState(false)
   const [url, setUrl] = useState('')
   /* Tracks the visitor supplied, appended to the carousel so stepping away
@@ -86,7 +101,12 @@ export function MusicPlayer() {
       hostRef.current.appendChild(host)
       playerRef.current = new YT.Player(host, {
         videoId,
-        playerVars: { autoplay: 1, controls: 0, playsinline: 1, disablekb: 1 },
+        /* `mute: 1` is load-bearing, not a duplicate of the mute() below.
+           The iframe attempts its autoplay as soon as it loads, and an
+           unmuted attempt is blocked before onReady ever runs, which left
+           the player parked in UNSTARTED with nothing to restart it. Muting
+           in the URL means the attempt is a permitted one. */
+        playerVars: { autoplay: 1, mute: 1, controls: 0, playsinline: 1, disablekb: 1 },
         events: {
           onReady: (e) => {
             /* Muted first, always: unmuted autoplay without a gesture is
@@ -98,19 +118,28 @@ export function MusicPlayer() {
           },
           onStateChange: (e) => {
             if (e.data === PLAYING) {
+              swapping.current = false
               dispatch({ type: 'PLAY_MUSIC' })
               /* Metadata is only reliable once playback has started, and it
                  describes what is loaded now rather than the ID this effect
                  closed over however many tracks ago. */
-              const data = e.target.getVideoData?.()
+              const data = readVideoData(e.target)
               const id = data?.video_id
               const title = data?.title
               if (id !== undefined && title !== undefined && title !== '') {
                 setPasted((current) =>
-                  current.map((track) => (track.videoId === id ? { ...track, title } : track)),
+                  // Same array back when nothing matched, so a shipped track
+                  // starting does not re-render the widget for no reason.
+                  current.some((track) => track.videoId === id && track.title !== title)
+                    ? current.map((track) => (track.videoId === id ? { ...track, title } : track))
+                    : current,
                 )
               }
-            } else if (e.data === PAUSED) dispatch({ type: 'PAUSE_MUSIC' })
+            } else if (e.data === PAUSED) {
+              // Only a pause the visitor asked for. Mid-swap, the new track
+              // is on its way in and nothing has been paused.
+              if (!swapping.current) dispatch({ type: 'PAUSE_MUSIC' })
+            }
             // Background music that dies after one track isn't background
             // music. Cheaper than playerVars.loop, which needs a playlist
             // param and stops working after loadVideoById.
@@ -184,15 +213,25 @@ export function MusicPlayer() {
     else playerRef.current?.unMute()
   }, [ready, music.isMuted])
 
+  /* `awaitingUserGesture` is in here because the first gesture is a reason
+     to re-assert playback, not just to unmute. LOAD_TRACK sets `isPlaying`
+     optimistically at load, so if the browser refused that first play the
+     flag never changes again and this effect never re-runs: the widget reads
+     "playing" over a silent player, for good. Re-running it on the gesture
+     retries the play with user activation behind it. */
   useEffect(() => {
     if (!ready) return
     if (music.isPlaying) playerRef.current?.playVideo()
     else playerRef.current?.pauseVideo()
-  }, [ready, music.isPlaying])
+  }, [ready, music.isPlaying, music.awaitingUserGesture])
 
+  /* Changing track is a request to hear it, so this never leaves the player
+     paused. `loadVideoById` starts on its own, and `swapping` keeps the
+     PAUSED it emits on the way from being written back into state. */
   useEffect(() => {
     if (!ready || music.videoId === loadedId.current) return
     loadedId.current = music.videoId
+    swapping.current = true
     playerRef.current?.loadVideoById(music.videoId)
   }, [ready, music.videoId])
 
