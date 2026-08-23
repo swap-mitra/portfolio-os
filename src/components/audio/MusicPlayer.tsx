@@ -10,7 +10,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import './MusicPlayer.css'
 import { useOS } from '../../state/osContext'
-import { DEFAULT_TRACK_CREDIT, DEFAULT_VIDEO_ID } from '../../data/siteConfig'
+import { DEFAULT_TRACKS, DEFAULT_VIDEO_ID, trackCredit } from '../../data/siteConfig'
 import { ENDED, PARSE_ERROR, PAUSED, PLAYING, extractVideoId, playerErrorMessage } from './musicUtils'
 import type { YTApi, YTPlayer } from '../../types/youtube'
 
@@ -21,6 +21,13 @@ const API_SRC = 'https://www.youtube.com/iframe_api'
    "already loaded" and "loading right now" cases fall out for free, which is
    what makes StrictMode's double-mount harmless (architecture.md §8.1). */
 let apiPromise: Promise<YTApi> | undefined
+
+interface PastedTrack {
+  videoId: string
+  /** What the player reports once metadata arrives. Empty until then, and
+      the widget falls back to showing the ID. */
+  title: string
+}
 
 function loadIframeApi(): Promise<YTApi> {
   apiPromise ??= new Promise<YTApi>((resolve) => {
@@ -47,6 +54,11 @@ export function MusicPlayer() {
   const loadedId = useRef<string | null>(null)
   const [ready, setReady] = useState(false)
   const [url, setUrl] = useState('')
+  /* Tracks the visitor supplied, appended to the carousel so stepping away
+     from one can step back to it. Component state rather than the reducer or
+     localStorage: MusicPlayer is mounted for the life of the tab, which is
+     exactly how long this should last. */
+  const [pasted, setPasted] = useState<PastedTrack[]>([])
 
   /* initialState leaves videoId empty so this component decides the default
      (or persistence already restored the visitor's last pick). */
@@ -85,8 +97,20 @@ export function MusicPlayer() {
             setReady(true)
           },
           onStateChange: (e) => {
-            if (e.data === PLAYING) dispatch({ type: 'PLAY_MUSIC' })
-            else if (e.data === PAUSED) dispatch({ type: 'PAUSE_MUSIC' })
+            if (e.data === PLAYING) {
+              dispatch({ type: 'PLAY_MUSIC' })
+              /* Metadata is only reliable once playback has started, and it
+                 describes what is loaded now rather than the ID this effect
+                 closed over however many tracks ago. */
+              const data = e.target.getVideoData?.()
+              const id = data?.video_id
+              const title = data?.title
+              if (id !== undefined && title !== undefined && title !== '') {
+                setPasted((current) =>
+                  current.map((track) => (track.videoId === id ? { ...track, title } : track)),
+                )
+              }
+            } else if (e.data === PAUSED) dispatch({ type: 'PAUSE_MUSIC' })
             // Background music that dies after one track isn't background
             // music. Cheaper than playerVars.loop, which needs a playlist
             // param and stops working after loadVideoById.
@@ -120,6 +144,19 @@ export function MusicPlayer() {
        running on the same flip. One owner, no duplicate call, no dependency
        to argue about. */
   }, [music.videoId, dispatch])
+
+  /* Anything playing that the site didn't ship belongs to the visitor,
+     whether they just pasted it or localStorage restored it on a return
+     visit. Registering it here rather than in the submit handler covers both
+     without a second code path. */
+  useEffect(() => {
+    if (music.videoId === '' || trackCredit(music.videoId) !== undefined) return
+    setPasted((current) =>
+      current.some((track) => track.videoId === music.videoId)
+        ? current
+        : [...current, { videoId: music.videoId, title: '' }],
+    )
+  }, [music.videoId])
 
   /* First interaction anywhere on the page unmutes (§8.3). Deliberately on
      document, not the widget: most visitors' first click is a desktop icon. */
@@ -172,6 +209,40 @@ export function MusicPlayer() {
     setUrl('')
   }
 
+  /* Everything the arrows step through: the shipped list, then whatever the
+     visitor has added this session. Appending rather than replacing is what
+     stops a pasted track being lost the moment they press next.
+
+     Position is `music.videoId` itself, not an index kept alongside it. Two
+     sources of truth for "which track" is exactly how a credit line ends up
+     naming a different song than the one playing. */
+  const playlist = [...DEFAULT_TRACKS.map((track) => track.videoId), ...pasted.map((t) => t.videoId)]
+  const position = playlist.indexOf(music.videoId)
+
+  const stepTrack = (delta: number) => {
+    const count = playlist.length
+    // -1 only in the gap before a new track registers, so start from the top.
+    const to = position === -1 ? 0 : position + delta
+    const next = playlist[((to % count) + count) % count]
+    if (next === undefined) return
+    dispatch({ type: 'LOAD_TRACK', videoId: next, isDefaultTrack: trackCredit(next) !== undefined })
+  }
+
+  /* The line under the widget. A shipped track carries the credit NCS's
+     licence requires; a pasted one gets the title the player reports, which
+     is the only thing known about it. */
+  const credit = trackCredit(music.videoId)
+  const yours = pasted.find((track) => track.videoId === music.videoId)
+  const nowPlaying =
+    credit !== undefined
+      ? { text: `${credit.artist} - ${credit.title} [${credit.label}]`, url: credit.url }
+      : yours === undefined
+        ? undefined
+        : {
+            text: yours.title === '' ? yours.videoId : yours.title,
+            url: `https://www.youtube.com/watch?v=${yours.videoId}`,
+          }
+
   return (
     <div className="music-player">
       {/* The player itself is never seen; this is an audio feature. Kept in
@@ -181,6 +252,16 @@ export function MusicPlayer() {
       <div className="music-host" ref={hostRef} aria-hidden="true" />
 
       <div className="music-row">
+        {/* Only worth rendering when there is somewhere to step to. */}
+        {playlist.length > 1 && (
+          <button
+            className="music-btn pixel"
+            onClick={() => stepTrack(-1)}
+            aria-label="Previous track"
+          >
+            ◀◀
+          </button>
+        )}
         <button
           className="music-btn pixel"
           onClick={() => dispatch({ type: music.isPlaying ? 'PAUSE_MUSIC' : 'PLAY_MUSIC' })}
@@ -188,6 +269,11 @@ export function MusicPlayer() {
         >
           {music.isPlaying ? '❚❚' : '▶'}
         </button>
+        {playlist.length > 1 && (
+          <button className="music-btn pixel" onClick={() => stepTrack(1)} aria-label="Next track">
+            ▶▶
+          </button>
+        )}
         <button
           className="music-btn pixel"
           onClick={() => dispatch({ type: 'TOGGLE_MUTE' })}
@@ -206,7 +292,9 @@ export function MusicPlayer() {
           onChange={(e) => dispatch({ type: 'SET_VOLUME', volume: e.target.valueAsNumber })}
         />
         <span className="music-label pixel">
-          {music.isDefaultTrack ? 'DEFAULT TRACK' : 'YOUR PICK'}
+          {/* Position rather than a flat "DEFAULT TRACK", so the arrows read
+              as a list you are moving through and not as a shuffle. */}
+          {position === -1 ? 'YOUR PICK' : `TRACK ${position + 1}/${playlist.length}`}
         </span>
       </div>
 
@@ -224,11 +312,12 @@ export function MusicPlayer() {
         </button>
       </form>
 
-      {music.isDefaultTrack && (
-        <p className="music-credit">
-          <a href={DEFAULT_TRACK_CREDIT.url} target="_blank" rel="noopener noreferrer">
-            {DEFAULT_TRACK_CREDIT.artist} - {DEFAULT_TRACK_CREDIT.title} [
-            {DEFAULT_TRACK_CREDIT.label}]
+      {/* Driven by the track actually loaded, not by `isDefaultTrack`: this
+          has to name the song playing or it is worse than nothing. */}
+      {nowPlaying !== undefined && (
+        <p className="music-credit" title={nowPlaying.text}>
+          <a href={nowPlaying.url} target="_blank" rel="noopener noreferrer">
+            {nowPlaying.text}
           </a>
         </p>
       )}

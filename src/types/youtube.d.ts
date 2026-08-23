@@ -11,6 +11,12 @@ export interface YTPlayer {
   unMute(): void
   setVolume(volume: number): void
   getPlayerState(): number
+  /** Metadata for whatever is loaded *now*, which is not necessarily the ID
+      the player was constructed with: `loadVideoById` changes it underneath.
+      Undocumented but long-stable, and optional here so a build without it
+      is a typed possibility rather than a crash. Fields are optional for the
+      same reason: it returns an empty object before metadata arrives. */
+  getVideoData?(): { video_id?: string; title?: string; author?: string } | undefined
 }
 
 /** Numeric values of `YT.PlayerState`. Declared as plain consts in
