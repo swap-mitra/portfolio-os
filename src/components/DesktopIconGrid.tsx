@@ -9,7 +9,14 @@ import { APP_LABELS } from './Window'
 import { currentViewport } from './viewport'
 import type { AppType } from '../types/os'
 
-const APP_ORDER: AppType[] = ['about', 'projects', 'resume', 'contact', 'terminal']
+const APP_ORDER: AppType[] = [
+  'about',
+  'projects',
+  'resume',
+  'contact',
+  'terminal',
+  'recyclebin',
+]
 
 export function DesktopIconGrid() {
   const { state, dispatch } = useOS()

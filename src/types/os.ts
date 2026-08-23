@@ -1,7 +1,13 @@
 /* Core OS state contract (architecture.md §3). Every later phase builds
    against these types, so changes here are expensive after Phase 1. */
 
-export type AppType = 'about' | 'projects' | 'resume' | 'contact' | 'terminal'
+export type AppType =
+  | 'about'
+  | 'projects'
+  | 'resume'
+  | 'contact'
+  | 'terminal'
+  | 'recyclebin'
 
 /** Position + size of a window. Named because maximize/restore, the resize
     hook, and the reducer's action payloads all pass the same four numbers. */

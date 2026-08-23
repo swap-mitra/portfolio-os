@@ -5,15 +5,16 @@
 import './ProjectsApp.css'
 import { PixelIcon } from '../icons/PixelIcon'
 import { projects } from '../../data/projects'
+import type { Project } from '../../types/content'
 
 /* The mockup's rows are plain text. Real ones have to be reachable, so the
    title is the link, because a separate "visit" affordance would be a second thing
    to hit for the same destination. `noopener noreferrer` on every external
    target: `noopener` denies the opened tab a handle on `window.opener`. */
-export function ProjectsApp() {
+export function ProjectsApp({ items = projects }: { items?: Project[] }) {
   return (
     <>
-      {projects.map((project) => (
+      {items.map((project) => (
         <div key={project.id} className="proj-row">
           <PixelIcon variant="projects" />
           <div>

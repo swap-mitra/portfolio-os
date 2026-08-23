@@ -10,7 +10,7 @@ import { START_BUTTON_ID, focusById } from './focusIds'
 import { currentViewport } from './viewport'
 import type { AppType } from '../types/os'
 
-const PROGRAM_APPS: AppType[] = ['about', 'projects', 'contact', 'terminal']
+const PROGRAM_APPS: AppType[] = ['about', 'projects', 'contact', 'terminal', 'recyclebin']
 
 export function StartMenu() {
   const { state, dispatch } = useOS()

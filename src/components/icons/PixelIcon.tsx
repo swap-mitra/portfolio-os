@@ -34,6 +34,17 @@ const SHAPES: Record<AppType, ReactNode> = {
       <rect x="4.5" y="4.6" width="1" height="1" fill="var(--ink)" />
     </>
   ),
+  /* A bin: tapered body, lid, and two slats. Same 10x10 grid and flat-fill
+     idiom as the rest, so it sits in the icon row without special casing. */
+  recyclebin: (
+    <>
+      <rect x="1.5" y="1" width="7" height="1.2" fill="var(--paper)" />
+      <rect x="4" y="0.2" width="2" height="0.8" fill="var(--paper)" />
+      <rect x="2" y="2.4" width="6" height="6.6" fill="var(--paper)" />
+      <rect x="3.4" y="3.6" width="0.9" height="4.2" fill="var(--ink)" />
+      <rect x="5.7" y="3.6" width="0.9" height="4.2" fill="var(--ink)" />
+    </>
+  ),
   terminal: (
     <>
       <rect x="1" y="1" width="8" height="8" fill="var(--cyan)" />

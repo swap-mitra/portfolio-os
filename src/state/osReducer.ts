@@ -21,6 +21,7 @@ export const OPEN_SIZE: Record<AppType, { width: number; height: number }> = {
   resume: { width: 640, height: 580 },
   contact: { width: 520, height: 280 },
   terminal: { width: 700, height: 470 },
+  recyclebin: { width: 680, height: 530 },
 }
 
 /** Breathing room kept between a freshly opened window and the viewport edge. */
