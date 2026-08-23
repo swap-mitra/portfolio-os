@@ -7,7 +7,7 @@ import { PARSE_ERROR } from '../audio/musicUtils'
 describe('runCommand', () => {
   it('lists every command it can run, so help cannot go stale', () => {
     const { lines } = runCommand('help')
-    for (const name of ['help', 'whoami', 'skills', 'projects', 'play']) {
+    for (const name of ['help', 'whoami', 'skills', 'projects', 'keys', 'play']) {
       expect(lines.join('\n')).toContain(name)
       expect(runCommand(name).lines.join('\n')).not.toContain('command not found')
     }
@@ -29,6 +29,16 @@ describe('runCommand', () => {
     for (const project of projects) {
       expect(printed).toContain(project.title)
       expect(printed).toContain(project.link)
+    }
+  })
+
+  it('documents a shortcut for every part of the desktop that has one', () => {
+    const printed = runCommand('keys').lines.join('\n')
+    for (const heading of ['Desktop:', 'Terminal:', 'Minesweeper:']) {
+      expect(printed).toContain(heading)
+    }
+    for (const key of ['Escape', 'Tab', 'Up / Down', 'Arrows', 'Right-click']) {
+      expect(printed).toContain(key)
     }
   })
 

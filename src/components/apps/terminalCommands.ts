@@ -23,6 +23,13 @@ type Handler = (arg: string) => CommandResult
 
 const out = (...lines: string[]): CommandResult => ({ lines })
 
+/** Two-column layout for `keys`, indented under its heading. The key column
+    is padded to the widest entry so the descriptions line up. */
+const keyTable = (rows: [string, string][]): string[] => {
+  const width = Math.max(...rows.map(([key]) => key.length))
+  return rows.map(([key, meaning]) => `  ${key.padEnd(width)}  ${meaning}`)
+}
+
 /** Name to blurb, in the order `help` prints them. Adding a command means
     adding it here and to `commands` below, so `help` can't go stale. */
 const HELP: Record<string, string> = {
@@ -30,6 +37,7 @@ const HELP: Record<string, string> = {
   whoami: 'a short introduction',
   skills: 'languages, frameworks, and tools',
   projects: 'what I have built, with links',
+  keys: 'keyboard shortcuts for the whole desktop',
   'play <url>': 'play a YouTube track in the background',
   clear: 'clear the screen',
 }
@@ -50,6 +58,36 @@ const commands: Record<string, Handler> = {
      The Projects window is where the prose belongs. */
   projects: () =>
     out(...projects.flatMap((project) => [project.title, `  ${project.stack}`, `  ${project.link}`])),
+
+  /* Shortcuts nothing else on the desktop advertises. Kept as data rather
+     than prose so a missing column is obvious at a glance, and deliberately
+     hand-written: the handlers that implement these live in six different
+     files, so there is nothing to derive it from that wouldn't be a bigger
+     lie than a list. Anything added here has to be added there first. */
+  keys: () =>
+    out(
+      'Desktop:',
+      ...keyTable([
+        ['Tab / Shift+Tab', 'move between icons, windows, and the taskbar'],
+        ['Enter / Space', 'open the selected icon or press a button'],
+        ['Escape', 'close the focused window, or the start menu'],
+        ['Any key', 'skip the boot sequence, or come back from shutdown'],
+      ]),
+      '',
+      'Terminal:',
+      ...keyTable([
+        ['Up / Down', 'walk back through commands you have run'],
+        ['Enter', 'run the line'],
+      ]),
+      '',
+      'Minesweeper:',
+      ...keyTable([
+        ['Arrows', 'move around the board, wrapping at the edges'],
+        ['Enter / Space', 'reveal the cell under the cursor'],
+        ['F', 'flag the cell under the cursor'],
+        ['Right-click', 'flag a cell with the mouse'],
+      ]),
+    ),
 
   clear: () => ({ lines: [], clear: true }),
 
