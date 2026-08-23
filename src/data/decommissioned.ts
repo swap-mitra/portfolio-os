@@ -1,7 +1,7 @@
 /* The recycle bin's contents: repos that shipped, taught something, and are
    not being maintained any more. Same `Project` shape as projects.ts, because
-   the bin window renders them with the same row layout — the only difference
-   is which list it is handed. */
+   the bin window renders them with the same row layout. The only
+   difference is which list it is handed. */
 
 import type { Project } from '../types/content'
 
