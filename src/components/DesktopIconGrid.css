@@ -9,6 +9,12 @@
   flex-direction: column;
   gap: 18px;
   z-index: var(--z-icons);
+  /* The column used to run off the bottom of a short window and hide icons
+     behind the taskbar. Bounding it and letting it wrap starts a second
+     column instead, which is what a desktop does. */
+  max-height: calc(100vh - var(--taskbar-height) - 48px);
+  flex-wrap: wrap;
+  align-content: flex-start;
 }
 
 .icon {
