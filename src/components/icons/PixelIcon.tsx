@@ -56,6 +56,18 @@ const SHAPES: Record<AppType, ReactNode> = {
       <rect x="3.5" y="3.5" width="1.2" height="1.2" fill="var(--ink)" />
     </>
   ),
+  /* A face mid-laugh: eyes screwed shut into two dashes, mouth wide open.
+     Yellow so it reads as the odd one out on the desktop, which it is. */
+  jokes: (
+    <>
+      <rect x="2" y="1" width="6" height="8" fill="var(--yellow)" />
+      <rect x="1" y="2" width="8" height="6" fill="var(--yellow)" />
+      <rect x="2.5" y="3.2" width="1.8" height="0.8" fill="var(--ink)" />
+      <rect x="5.7" y="3.2" width="1.8" height="0.8" fill="var(--ink)" />
+      <rect x="3" y="5.4" width="4" height="2.2" fill="var(--ink)" />
+      <rect x="3.8" y="6.8" width="2.4" height="0.9" fill="var(--magenta)" />
+    </>
+  ),
   terminal: (
     <>
       <rect x="1" y="1" width="8" height="8" fill="var(--cyan)" />

@@ -9,6 +9,7 @@ export type AppType =
   | 'terminal'
   | 'recyclebin'
   | 'minesweeper'
+  | 'jokes'
 
 /** Position + size of a window. Named because maximize/restore, the resize
     hook, and the reducer's action payloads all pass the same four numbers. */
