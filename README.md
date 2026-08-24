@@ -107,6 +107,11 @@ Deploys run **only** through `.github/workflows/deploy.yml`. Nobody — human or
 `build` is the gate: both deploy jobs `needs: build`, so a type error or lint failure means
 nothing is deployed.
 
+`public/google182455acaf8e075f.html` is Google Search Console's site-verification file. Its
+contents are fixed by Google and it has to stay reachable at the site root — deleting it
+un-verifies the property, which is what indexing and search-performance data hang off. It lives
+in `public/` so the build copies it verbatim; it is not a page.
+
 ### One-time setup (repo owner only — cannot be automated)
 
 The two deploy jobs need three GitHub Actions repository secrets. **They are not set yet, so
