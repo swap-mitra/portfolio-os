@@ -207,6 +207,15 @@ describe('maximize', () => {
     expect(w.height).toBeLessThan(viewport.height)
   })
 
+  it('fills a large viewport instead of snapping to a fixed-size box', () => {
+    const big = { width: 2560, height: 1440 }
+    const w = run(open('about'), { type: 'TOGGLE_MAXIMIZE', id: 'about', viewport: big })
+      .windows['about']!
+    // Was the bug: hardcoded caps left it at 680x460 wherever the screen went.
+    expect(w.width).toBeGreaterThan(big.width * 0.9)
+    expect(w.height).toBeGreaterThan(big.height * 0.8)
+  })
+
   it('toggling again restores the exact previous position and size', () => {
     const s = run(
       open('about'),

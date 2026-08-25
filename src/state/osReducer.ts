@@ -34,11 +34,10 @@ const OPEN_MARGIN = 16
 const CASCADE_STEP = 26
 const CASCADE_WRAP = 5
 
-/** Maximize is "expanded but bounded", not fullscreen — the desktop stays
-    visible behind it (architecture.md §5). Mirrors the mockup's
-    `min(680px, 100% - 40px)` / `min(460px, 100% - 120px)`. */
-const MAX_WIDTH = 680
-const MAX_HEIGHT = 460
+/** Maximize fills the viewport apart from a margin, so the desktop still
+    shows at the edges (architecture.md §5). The mockup's `min(680px, ...)`
+    caps came off: on a real screen they turned maximize into a jump to a
+    fixed 680x460 box rather than an expansion. */
 const MAX_MARGIN = 20
 /** Vertical room left for the 44px taskbar plus breathing space. */
 const MAX_VERTICAL_INSET = 120
@@ -256,11 +255,8 @@ export function osReducer(state: OSState, action: Action): OSState {
         maximized: true,
         x: MAX_MARGIN,
         y: MAX_MARGIN,
-        width: Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, action.viewport.width - MAX_MARGIN * 2)),
-        height: Math.max(
-          MIN_HEIGHT,
-          Math.min(MAX_HEIGHT, action.viewport.height - MAX_VERTICAL_INSET),
-        ),
+        width: Math.max(MIN_WIDTH, action.viewport.width - MAX_MARGIN * 2),
+        height: Math.max(MIN_HEIGHT, action.viewport.height - MAX_VERTICAL_INSET),
       })
     }
 
