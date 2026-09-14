@@ -40,7 +40,7 @@ export function DesktopIcon({
       }}
     >
       <PixelIcon variant={appType} />
-      <span>{label}</span>
+      <span className="icon-label">{label}</span>
       {/* Hover and focus reveal it after a delay, in CSS (DesktopIconGrid.css). */}
       <span className="icon-tip" role="tooltip" id={`${iconId(appType)}-tip`}>
         {blurb}

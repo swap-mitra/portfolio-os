@@ -36,7 +36,9 @@
   filter: drop-shadow(0 0 3px currentColor);
 }
 
-.icon span {
+/* Named rather than `.icon span`: the help balloon below is a span too,
+   and an element selector here outranked its class and painted it pale. */
+.icon-label {
   font-size: 9px;
   line-height: 1.4;
   text-align: center;
@@ -45,7 +47,7 @@
   letter-spacing: 0.5px;
 }
 
-.icon.selected span {
+.icon.selected .icon-label {
   background: var(--cyan);
   color: var(--ink);
 }
