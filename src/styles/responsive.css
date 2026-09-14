@@ -84,7 +84,6 @@
   }
 
   .desktop .clock {
-    margin-left: auto;
     flex-shrink: 0;
     font-size: 8px;
   }

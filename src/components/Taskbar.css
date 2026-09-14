@@ -67,8 +67,30 @@
   }
 }
 
-.clock {
+/* The drive light: dark at rest, green and flickering while "busy". */
+.disk-led {
   margin-left: auto;
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  background: var(--ink-3);
+  border: 1px solid var(--ink);
+}
+
+.disk-led.busy {
+  background: var(--green);
+  box-shadow: 0 0 6px var(--green);
+  animation: led-flicker 80ms steps(2) infinite;
+}
+
+@keyframes led-flicker {
+  to {
+    opacity: 0.3;
+  }
+}
+
+.clock {
+  margin-left: 8px;
   font-size: 11px;
   color: var(--green);
 }
