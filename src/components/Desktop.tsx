@@ -11,6 +11,7 @@ import { WindowManager } from './WindowManager'
 import { StartMenu } from './StartMenu'
 import { Taskbar } from './Taskbar'
 import { MusicPlayer } from './audio/MusicPlayer'
+import { Screensaver } from './Screensaver'
 import { globalKeyAction } from '../state/globalKeys'
 import { focusById, iconId } from './focusIds'
 import { currentViewport } from './viewport'
@@ -94,6 +95,7 @@ export function Desktop() {
       <StartMenu />
       <MusicPlayer />
       <Taskbar />
+      <Screensaver />
       {state.shuttingDown && (
         <div
           className="shutdown-overlay"

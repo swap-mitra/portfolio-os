@@ -85,7 +85,7 @@ const commands: Record<string, Handler> = {
         ['Tab / Shift+Tab', 'move between icons, windows, and the taskbar'],
         ['Enter / Space', 'open the selected icon or press a button'],
         ['Escape', 'close the focused window, or the start menu'],
-        ['Any key', 'skip the boot sequence, or come back from shutdown'],
+        ['Any key', 'skip the boot, wake the screensaver, or leave shutdown'],
       ]),
       '',
       'Terminal:',
