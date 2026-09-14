@@ -79,22 +79,31 @@ export function Desktop() {
 
   return (
     <div
-      className={hidden ? 'desktop desktop--paused' : 'desktop'}
+      className={[
+        'desktop',
+        hidden ? 'desktop--paused' : '',
+        state.shuttingDown ? 'desktop--off' : '',
+      ].join(' ')}
       onClick={(e) => {
         if (!(e.target as HTMLElement).closest('.icon')) {
           dispatch({ type: 'SELECT_ICON', appType: null })
         }
       }}
     >
-      <DriveBackground />
-      <div className="drive-vignette" aria-hidden="true" />
-      <ScanlineOverlay />
-      <div className="wordmark pixel">PORTFOLIO-OS</div>
-      <DesktopIconGrid />
-      <WindowManager />
-      <StartMenu />
-      <MusicPlayer />
-      <Taskbar />
+      {/* Everything that is "the picture" lives in one box so the CRT
+          power-off can collapse it as one image (Desktop.css). The overlays
+          below it are what the visitor sees once the tube is dark. */}
+      <div className="desktop-screen">
+        <DriveBackground />
+        <div className="drive-vignette" aria-hidden="true" />
+        <ScanlineOverlay />
+        <div className="wordmark pixel">PORTFOLIO-OS</div>
+        <DesktopIconGrid />
+        <WindowManager />
+        <StartMenu />
+        <MusicPlayer />
+        <Taskbar />
+      </div>
       <Screensaver />
       {state.shuttingDown && (
         <div

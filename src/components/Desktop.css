@@ -24,6 +24,60 @@
   animation-play-state: paused !important;
 }
 
+/* The picture, as distinct from the desktop's ground. Positioned so the
+   absolutely placed chrome inside it keeps the same box it had, and so a
+   transform on it moves everything together. The tube "switches on" when
+   the desktop mounts and again when shutdown ends: the two rules name
+   different animations, and changing animation-name restarts it. */
+.desktop-screen {
+  position: absolute;
+  inset: 0;
+  animation: crt-on 450ms ease-out;
+}
+
+/* Collapse to a bright line, then to a dot, and hold there under the
+   shutdown overlay. */
+.desktop--off .desktop-screen {
+  animation: crt-off 350ms ease-in forwards;
+}
+
+@keyframes crt-on {
+  0% {
+    transform: scale(0.3, 0.004);
+    filter: brightness(4);
+  }
+  45% {
+    transform: scale(1, 0.004);
+    filter: brightness(4);
+  }
+  100% {
+    transform: none;
+    filter: none;
+  }
+}
+
+@keyframes crt-off {
+  0% {
+    transform: none;
+    filter: none;
+  }
+  55% {
+    transform: scale(1, 0.004);
+    filter: brightness(4);
+  }
+  100% {
+    transform: scale(0, 0.004);
+    filter: brightness(4);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .desktop-screen,
+  .desktop--off .desktop-screen {
+    animation: none;
+  }
+}
+
 .wordmark {
   position: absolute;
   top: 14px;
@@ -49,6 +103,20 @@
   text-align: center;
   color: var(--paper);
   cursor: pointer;
+  /* Waits for the tube to go dark before the message appears. */
+  animation: shutdown-in 150ms 350ms both;
+}
+
+@keyframes shutdown-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shutdown-overlay {
+    animation: none;
+  }
 }
 
 .shutdown-overlay p {
