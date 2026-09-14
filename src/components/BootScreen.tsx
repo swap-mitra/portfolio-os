@@ -7,8 +7,12 @@ import { useEffect, useState } from 'react'
 import './BootScreen.css'
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion'
 
+/** Sentinel for the one line that renders a component instead of a string. */
+const MEMORY = 'MEMORY TEST'
+
 const LINES = [
   'PORTFOLIO-OS v1.0',
+  MEMORY,
   'INITIALIZING NEON SUBSYSTEMS...',
   'LOADING DESKTOP ENVIRONMENT...',
   'READY.',
@@ -16,6 +20,27 @@ const LINES = [
 
 const LINE_DELAY_MS = 400
 const HOLD_MS = 900
+
+/** 640K, counted up in the time the boot sequence gives one line. */
+const MEMORY_KB = 640
+const MEMORY_STEP_KB = 64
+const MEMORY_STEP_MS = 35
+
+function MemoryTest() {
+  const [kb, setKb] = useState(0)
+
+  useEffect(() => {
+    if (kb >= MEMORY_KB) return
+    const id = setTimeout(() => setKb(kb + MEMORY_STEP_KB), MEMORY_STEP_MS)
+    return () => clearTimeout(id)
+  }, [kb])
+
+  return (
+    <div>
+      MEMORY TEST: {String(kb).padStart(3, '\u00a0')}K{kb >= MEMORY_KB ? ' OK' : ''}
+    </div>
+  )
+}
 
 export function BootScreen({ onDone }: { onDone: () => void }) {
   const skip = usePrefersReducedMotion()
@@ -48,9 +73,9 @@ export function BootScreen({ onDone }: { onDone: () => void }) {
 
   return (
     <div className="boot-screen pixel">
-      {LINES.slice(0, visibleLines).map((line) => (
-        <div key={line}>{line}</div>
-      ))}
+      {LINES.slice(0, visibleLines).map((line) =>
+        line === MEMORY ? <MemoryTest key={line} /> : <div key={line}>{line}</div>,
+      )}
       {visibleLines >= LINES.length && <div className="boot-hint">PRESS ANY KEY TO CONTINUE</div>}
     </div>
   )
