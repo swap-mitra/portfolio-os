@@ -83,8 +83,9 @@ export function TerminalApp() {
       queue.current = []
       setLines([])
     } else {
-      setLines((prev) => [...prev, `> ${entered}`])
-      print(output)
+      // The echo queues with the output, so a command typed while the last
+      // one is still printing lands after it rather than in the middle.
+      print([`> ${entered}`, ...output])
     }
 
     if (entered.trim() !== '') {
