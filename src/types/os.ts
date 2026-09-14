@@ -4,6 +4,7 @@
 export type AppType =
   | 'about'
   | 'projects'
+  | 'experience'
   | 'resume'
   | 'contact'
   | 'terminal'

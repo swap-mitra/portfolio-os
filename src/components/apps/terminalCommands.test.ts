@@ -2,12 +2,13 @@ import { describe, expect, it } from 'vitest'
 import { runCommand } from './terminalCommands'
 import { about } from '../../data/about'
 import { projects } from '../../data/projects'
+import { experience } from '../../data/experience'
 import { PARSE_ERROR } from '../audio/musicUtils'
 
 describe('runCommand', () => {
   it('lists every command it can run, so help cannot go stale', () => {
     const { lines } = runCommand('help')
-    for (const name of ['help', 'whoami', 'skills', 'projects', 'keys', 'play']) {
+    for (const name of ['help', 'whoami', 'skills', 'projects', 'experience', 'keys', 'play']) {
       expect(lines.join('\n')).toContain(name)
       expect(runCommand(name).lines.join('\n')).not.toContain('command not found')
     }
@@ -30,6 +31,15 @@ describe('runCommand', () => {
       expect(printed).toContain(project.title)
       expect(printed).toContain(project.link)
     }
+  })
+
+  it('prints every employer and engagement', () => {
+    const printed = runCommand('experience').lines.join('\n')
+    for (const role of experience.roles) {
+      expect(printed).toContain(role.company)
+      for (const engagement of role.engagements) expect(printed).toContain(engagement.name)
+    }
+    expect(printed).toContain(experience.education.school)
   })
 
   it('documents a shortcut for every part of the desktop that has one', () => {

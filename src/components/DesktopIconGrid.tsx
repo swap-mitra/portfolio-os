@@ -12,6 +12,7 @@ import type { AppType } from '../types/os'
 const APP_ORDER: AppType[] = [
   'about',
   'projects',
+  'experience',
   'resume',
   'contact',
   'terminal',

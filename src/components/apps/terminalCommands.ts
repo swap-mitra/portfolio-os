@@ -8,6 +8,7 @@
 
 import { about } from '../../data/about'
 import { projects } from '../../data/projects'
+import { experience } from '../../data/experience'
 import { PARSE_ERROR, extractVideoId } from '../audio/musicUtils'
 
 export interface CommandResult {
@@ -37,6 +38,7 @@ const HELP: Record<string, string> = {
   whoami: 'a short introduction',
   skills: 'languages, frameworks, and tools',
   projects: 'what I have built, with links',
+  experience: 'where I have worked, one line per engagement',
   keys: 'keyboard shortcuts for the whole desktop',
   'play <url>': 'play a YouTube track in the background',
   clear: 'clear the screen',
@@ -58,6 +60,18 @@ const commands: Record<string, Handler> = {
      The Projects window is where the prose belongs. */
   projects: () =>
     out(...projects.flatMap((project) => [project.title, `  ${project.stack}`, `  ${project.link}`])),
+
+  /* One line per engagement, for the same reason `projects` prints the
+     stack rather than the description: EXPERIENCE.LOG has the bullets. */
+  experience: () =>
+    out(
+      ...experience.roles.flatMap((role) => [
+        `${role.company} | ${role.title} | ${role.period}`,
+        ...role.engagements.flatMap((e) => [`  ${e.name}`, `    ${e.summary}`]),
+      ]),
+      '',
+      `${experience.education.school} | ${experience.education.degree} | ${experience.education.period}`,
+    ),
 
   /* Shortcuts nothing else on the desktop advertises. Kept as data rather
      than prose so a missing column is obvious at a glance, and deliberately

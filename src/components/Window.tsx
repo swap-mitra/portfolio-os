@@ -15,6 +15,7 @@ import type { ReactNode } from 'react'
 import type { AppType, WindowState } from '../types/os'
 import { AboutApp } from './apps/AboutApp'
 import { ProjectsApp } from './apps/ProjectsApp'
+import { ExperienceApp } from './apps/ExperienceApp'
 import { ContactApp } from './apps/ContactApp'
 import { ResumeApp } from './apps/ResumeApp'
 import { TerminalApp } from './apps/TerminalApp'
@@ -30,6 +31,7 @@ import { JokesApp } from './apps/JokesApp'
 export const APP_LABELS: Record<AppType, string> = {
   about: 'ABOUT_ME.TXT',
   projects: 'PROJECTS',
+  experience: 'EXPERIENCE.LOG',
   resume: 'RESUME.PDF',
   contact: 'CONTACT.EXE',
   terminal: 'TERMINAL.EXE',
@@ -45,6 +47,7 @@ export const APP_LABELS: Record<AppType, string> = {
 const APP_BODIES: Record<AppType, ReactNode> = {
   about: <AboutApp />,
   projects: <ProjectsApp />,
+  experience: <ExperienceApp />,
   contact: <ContactApp />,
   resume: <ResumeApp />,
   terminal: <TerminalApp />,

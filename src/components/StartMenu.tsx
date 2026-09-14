@@ -56,6 +56,7 @@ export function StartMenu() {
         </button>
       ))}
       <div className="start-menu-heading">DOCUMENTS</div>
+      <button onClick={() => openApp('experience')}>▸ {APP_LABELS.experience}</button>
       <button onClick={() => openApp('resume')}>▸ {APP_LABELS.resume}</button>
       <button onClick={() => dispatch({ type: 'SET_SHUTDOWN', shuttingDown: true })}>
         ▸ SHUT DOWN…

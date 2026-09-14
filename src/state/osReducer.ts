@@ -18,6 +18,7 @@ export const MIN_HEIGHT = 200
 export const OPEN_SIZE: Record<AppType, { width: number; height: number }> = {
   about: { width: 620, height: 470 },
   projects: { width: 680, height: 530 },
+  experience: { width: 680, height: 560 },
   resume: { width: 640, height: 580 },
   contact: { width: 520, height: 280 },
   terminal: { width: 700, height: 470 },

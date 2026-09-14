@@ -20,6 +20,17 @@ const SHAPES: Record<AppType, ReactNode> = {
       <rect x="1" y="3" width="8" height="5" fill="var(--cyan)" />
     </>
   ),
+  /* A briefcase: handle, body, and the clasp line across the middle.
+     Magenta because no other desktop icon uses it as a fill, so the new
+     entry reads as its own thing in the column. */
+  experience: (
+    <>
+      <rect x="3.5" y="1" width="3" height="1.2" fill="var(--magenta)" />
+      <rect x="1" y="2.2" width="8" height="6.8" fill="var(--magenta)" />
+      <rect x="1" y="5" width="8" height="0.7" fill="var(--ink)" />
+      <rect x="4.3" y="4.5" width="1.4" height="1.7" fill="var(--ink)" />
+    </>
+  ),
   resume: (
     <>
       <rect x="1" y="1" width="8" height="8" fill="var(--yellow)" />
