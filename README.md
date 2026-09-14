@@ -37,8 +37,14 @@ beside it, and Terminal runs a small hardcoded command set (`help`, `whoami`, `s
 the music widget's URL box dispatches).
 
 The copy is real, not placeholder. Bio and skills live in `src/data/about.ts`, the project list
-in `src/data/projects.ts`, email and profile links in `src/data/siteConfig.ts`, and the resume is
-`public/resume.pdf`. Nothing else needs touching to update any of it.
+in `src/data/projects.ts`, work history in `src/data/experience.ts` (the EXPERIENCE.LOG window
+and the terminal's `experience` command, there because the PDF does not preview on phones), email
+and profile links in `src/data/siteConfig.ts`, and the resume is `public/resume.pdf`. Nothing
+else needs touching to update any of it.
+
+Every window has a deep link: `/#projects`, `/#experience`, and so on open that window on load,
+and the hash follows whichever window is focused, so the address bar is always a link back to
+what the visitor is looking at.
 
 The background is a canvas scene drawn per frame: gradient sky, banded sun, mountain ridges, a
 perspective grid, and a road that scrolls towards you. Every frame is a pure function of elapsed
