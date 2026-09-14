@@ -8,12 +8,14 @@ import type { AppType } from '../types/os'
 export function DesktopIcon({
   appType,
   label,
+  blurb,
   selected,
   onSelect,
   onOpen,
 }: {
   appType: AppType
   label: string
+  blurb: string
   selected: boolean
   onSelect: () => void
   onOpen: () => void
@@ -25,6 +27,7 @@ export function DesktopIcon({
       role="button"
       tabIndex={0}
       aria-pressed={selected}
+      aria-describedby={`${iconId(appType)}-tip`}
       onClick={() => {
         onSelect()
         onOpen()
@@ -38,6 +41,10 @@ export function DesktopIcon({
     >
       <PixelIcon variant={appType} />
       <span>{label}</span>
+      {/* Hover and focus reveal it after a delay, in CSS (DesktopIconGrid.css). */}
+      <span className="icon-tip" role="tooltip" id={`${iconId(appType)}-tip`}>
+        {blurb}
+      </span>
     </div>
   )
 }

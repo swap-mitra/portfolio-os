@@ -21,6 +21,19 @@ const APP_ORDER: AppType[] = [
   'jokes',
 ]
 
+/** One line per icon, shown as a help balloon after a second's hover. */
+const APP_BLURBS: Record<AppType, string> = {
+  about: 'Who I am and what I do',
+  projects: 'Things I have built, with links',
+  experience: 'Where I have worked',
+  resume: 'The one-page PDF, preview and download',
+  contact: 'Email, GitHub, LinkedIn',
+  terminal: "Type 'help' and see",
+  recyclebin: 'Projects I no longer maintain',
+  minesweeper: 'It is exactly what you think',
+  jokes: 'One joke at a time',
+}
+
 export function DesktopIconGrid() {
   const { state, dispatch } = useOS()
 
@@ -31,6 +44,7 @@ export function DesktopIconGrid() {
           key={appType}
           appType={appType}
           label={APP_LABELS[appType]}
+          blurb={APP_BLURBS[appType]}
           selected={state.selectedIconId === appType}
           onSelect={() => dispatch({ type: 'SELECT_ICON', appType })}
           onOpen={() => dispatch({ type: 'OPEN_WINDOW', appType, viewport: currentViewport() })}

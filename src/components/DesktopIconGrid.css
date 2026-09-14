@@ -18,6 +18,7 @@
 }
 
 .icon {
+  position: relative;
   width: 74px;
   display: flex;
   flex-direction: column;
@@ -47,4 +48,43 @@
 .icon.selected span {
   background: var(--cyan);
   color: var(--ink);
+}
+
+/* The help balloon: the pale yellow box every old desktop drew after you
+   left the pointer on something for a second. The delay is a transition
+   delay on the way in and none on the way out, so it never lingers. */
+.icon-tip {
+  position: absolute;
+  left: calc(100% - 6px);
+  top: 8px;
+  z-index: 1;
+  padding: 3px 7px;
+  background: #ffffc8;
+  color: var(--ink);
+  border: 1px solid var(--ink);
+  box-shadow: 2px 2px 0 var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.2;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0s,
+    visibility 0s;
+}
+
+.icon:hover .icon-tip,
+.icon:focus-visible .icon-tip {
+  opacity: 1;
+  visibility: visible;
+  transition-delay: 1s;
+}
+
+/* A thumb does not hover, and a tap opens the app anyway. */
+@media (hover: none) {
+  .icon-tip {
+    display: none;
+  }
 }
