@@ -13,7 +13,9 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 0 10px;
+  /* Phones with a home indicator: the token grows by the inset, and this
+     keeps the controls above it rather than stretching them into it. */
+  padding: 0 10px env(safe-area-inset-bottom, 0px);
   z-index: var(--z-taskbar);
 }
 

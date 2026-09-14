@@ -73,7 +73,7 @@
   /* Tabs accumulate faster than a phone has width for. */
   .desktop .taskbar {
     gap: 6px;
-    padding: 0 6px;
+    padding: 0 6px env(safe-area-inset-bottom, 0px);
     overflow-x: auto;
   }
 
