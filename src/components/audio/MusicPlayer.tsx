@@ -12,6 +12,7 @@ import './MusicPlayer.css'
 import { useOS } from '../../state/osContext'
 import { DEFAULT_TRACKS, DEFAULT_VIDEO_ID, trackCredit } from '../../data/siteConfig'
 import { ENDED, PARSE_ERROR, PAUSED, PLAYING, extractVideoId, playerErrorMessage } from './musicUtils'
+import { playDialup } from './retroSound'
 import type { YTApi, YTPlayer } from '../../types/youtube'
 
 const API_SRC = 'https://www.youtube.com/iframe_api'
@@ -192,7 +193,17 @@ export function MusicPlayer() {
   useEffect(() => {
     if (!music.awaitingUserGesture) return
 
-    const resolve = () => dispatch({ type: 'MUSIC_GESTURE_RESOLVED' })
+    /* The modem screech, once. A touch fires both touchstart and pointerdown
+       before the reducer has cleared awaitingUserGesture, so the guard is
+       here rather than in state. The gesture that unmutes is the one moment
+       the site starts making sound, which is exactly what a dial-up was. */
+    let dialled = false
+    const resolve = () => {
+      if (dialled) return
+      dialled = true
+      playDialup()
+      dispatch({ type: 'MUSIC_GESTURE_RESOLVED' })
+    }
     const events = ['pointerdown', 'keydown', 'touchstart'] as const
     for (const name of events) document.addEventListener(name, resolve)
     return () => {

@@ -127,3 +127,60 @@ export function playThunk(): void {
 export function playTick(): void {
   play([{ from: 700, to: 500, at: 0, duration: 0.015 }], CLICK)
 }
+
+/** A burst of white noise: the only sound here that is not a tone. Built
+    from random samples rather than an oscillator, and band-limited so it
+    hisses like a phone line rather than a waterfall. */
+function hiss(ctx: AudioContext, at: number, duration: number, level: number): void {
+  const buffer = ctx.createBuffer(1, Math.ceil(ctx.sampleRate * duration), ctx.sampleRate)
+  const data = buffer.getChannelData(0)
+  for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1
+
+  const source = ctx.createBufferSource()
+  source.buffer = buffer
+  const band = ctx.createBiquadFilter()
+  band.type = 'bandpass'
+  band.frequency.value = 2200
+  band.Q.value = 0.7
+  const gain = ctx.createGain()
+  const start = ctx.currentTime + at
+  gain.gain.setValueAtTime(level, start)
+  gain.gain.exponentialRampToValueAtTime(0.0001, start + duration)
+
+  source.connect(band).connect(gain).connect(ctx.destination)
+  source.start(start)
+  source.stop(start + duration)
+}
+
+/** Quieter than a sting: four tone pairs at once add up. */
+const MODEM = 0.045
+
+/** Dialling, the answer tone, the handshake warble, then the hiss. About
+    two seconds, once, when the site first makes sound. Square waves make it
+    a chiptune modem rather than a recording, which is the right one for a
+    desktop this cartoonish. */
+export function playDialup(): void {
+  const dial = (lo: number, hi: number, at: number): Tone[] => [
+    { from: lo, to: lo, at, duration: 0.08 },
+    { from: hi, to: hi, at, duration: 0.08 },
+  ]
+  play(
+    [
+      ...dial(941, 1336, 0),
+      ...dial(697, 1209, 0.12),
+      ...dial(852, 1477, 0.24),
+      ...dial(770, 1336, 0.36),
+      // Answer tone, then the carrier finding its feet.
+      { from: 2100, to: 2100, at: 0.6, duration: 0.3 },
+      { from: 1200, to: 2400, at: 0.95, duration: 0.2 },
+      { from: 1650, to: 1650, at: 1.15, duration: 0.06 },
+      { from: 1850, to: 1850, at: 1.21, duration: 0.06 },
+      { from: 1650, to: 1650, at: 1.27, duration: 0.06 },
+      { from: 1850, to: 1850, at: 1.33, duration: 0.06 },
+      { from: 980, to: 1180, at: 1.4, duration: 0.15 },
+    ],
+    MODEM,
+  )
+  const ctx = audio()
+  if (ctx !== null) hiss(ctx, 1.55, 0.45, MODEM * 2)
+}
