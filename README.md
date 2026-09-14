@@ -42,6 +42,15 @@ and the terminal's `experience` command, there because the PDF does not preview 
 and profile links in `src/data/siteConfig.ts`, and the resume is `public/resume.pdf`. Nothing
 else needs touching to update any of it.
 
+The retro mechanics, for anyone wondering whether they are deliberate: the boot sequence counts
+640K of memory; the desktop switches on like a tube and collapses to a line on shutdown; the
+terminal prints a line at a time with a tick behind a blinking block cursor, and `sudo` gets the
+classic answer; the taskbar has a drive light that flickers when a window opens or a track loads;
+icons show a pale yellow help balloon after a second's hover; the first click plays a two-second
+dial-up handshake before the music unmutes; and the Konami code (Up Up Down Down Left Right Left
+Right B A) swaps the chrome to a second neon palette for the session. Every sound goes through the
+site's mute, and every motion honours `prefers-reduced-motion`.
+
 Two minutes without input brings up a screensaver, the wordmark bouncing around a black screen.
 Any key or click wakes it, and that first input is swallowed so an Escape pressed to wake it
 does not also close the window underneath. The timeout is `IDLE_MS` in
