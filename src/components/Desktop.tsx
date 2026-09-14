@@ -13,6 +13,8 @@ import { Taskbar } from './Taskbar'
 import { MusicPlayer } from './audio/MusicPlayer'
 import { globalKeyAction } from '../state/globalKeys'
 import { focusById, iconId } from './focusIds'
+import { currentViewport } from './viewport'
+import { appFromHash, hashForApp } from '../state/deepLink'
 
 /* Nothing on this desktop is worth animating for a tab nobody is looking at
    (SPIKE-17). Owned here rather than inside the background components so one
@@ -33,6 +35,26 @@ function useDocumentHidden(): boolean {
 export function Desktop() {
   const { state, dispatch } = useOS()
   const hidden = useDocumentHidden()
+
+  /* `/#projects` opens PROJECTS: a link from a CV or a profile can land on
+     the window rather than on an icon somebody has to find. Read once, when
+     the desktop mounts after the boot screen. OPEN_WINDOW on an app that is
+     already open just focuses it, so StrictMode's double effect is harmless. */
+  useEffect(() => {
+    const appType = appFromHash(window.location.hash)
+    if (appType !== null) dispatch({ type: 'OPEN_WINDOW', appType, viewport: currentViewport() })
+  }, [dispatch])
+
+  /* The hash follows focus so the address bar is always a link back to what
+     the visitor is looking at. replaceState, not assignment: writing
+     location.hash pushes a history entry per focus change, and Back would
+     then walk through every window ever clicked. */
+  const focused = state.focusedWindowId === null ? null : state.windows[state.focusedWindowId]?.appType ?? null
+  useEffect(() => {
+    const hash = hashForApp(focused)
+    if (window.location.hash === hash) return
+    window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}${hash}`)
+  }, [focused])
 
   /* One keydown listener for the whole desktop, so the precedence between
      "close the menu" and "close the window" lives in globalKeys.ts rather
