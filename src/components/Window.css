@@ -19,7 +19,7 @@
   box-shadow:
     0 0 0 1px var(--ink),
     0 8px 24px rgba(0, 0, 0, 0.6),
-    0 0 14px rgba(255, 46, 107, 0.35);
+    0 0 14px color-mix(in srgb, var(--magenta) 35%, transparent);
   display: flex;
   flex-direction: column;
   /* A window that pops into existence reads as a bug; a short scale-in reads

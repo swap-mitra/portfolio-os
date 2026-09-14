@@ -9,7 +9,7 @@
   height: var(--taskbar-height);
   background: var(--ink-2);
   border-top: 2px solid var(--cyan);
-  box-shadow: 0 0 10px rgba(35, 240, 255, 0.35);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--cyan) 35%, transparent);
   display: flex;
   align-items: center;
   gap: 10px;

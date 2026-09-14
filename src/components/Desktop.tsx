@@ -1,7 +1,7 @@
 /* The real desktop shell (architecture.md §2), replacing the Phase 2 debug
    harness in App.tsx. */
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import './Desktop.css'
 import { useOS } from '../state/osContext'
 import { DriveBackground } from './background/DriveBackground'
@@ -16,6 +16,8 @@ import { globalKeyAction } from '../state/globalKeys'
 import { focusById, iconId } from './focusIds'
 import { currentViewport } from './viewport'
 import { appFromHash, hashForApp } from '../state/deepLink'
+import { KONAMI, konamiProgress } from '../state/konami'
+import { playWin } from './audio/retroSound'
 
 /* Nothing on this desktop is worth animating for a tab nobody is looking at
    (SPIKE-17). Owned here rather than inside the background components so one
@@ -36,6 +38,9 @@ function useDocumentHidden(): boolean {
 export function Desktop() {
   const { state, dispatch } = useOS()
   const hidden = useDocumentHidden()
+  /* How far through the Konami code the visitor is. A ref because it
+     changes on every keypress and nothing renders it. */
+  const konami = useRef(0)
 
   /* `/#projects` opens PROJECTS: a link from a CV or a profile can land on
      the window rather than on an icon somebody has to find. Read once, when
@@ -63,6 +68,18 @@ export function Desktop() {
      (SPIKE-28). */
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
+      /* Up Up Down Down Left Right Left Right B A: swap the chrome to the
+         alternate neon set for the session (tokens.css). Toggles, so the
+         code is also the way back. */
+      konami.current = konamiProgress(konami.current, e.key)
+      if (konami.current === KONAMI.length) {
+        konami.current = 0
+        const root = document.documentElement
+        if (root.dataset['palette'] === 'alt') delete root.dataset['palette']
+        else root.dataset['palette'] = 'alt'
+        if (!state.music.isMuted) playWin()
+      }
+
       const action = globalKeyAction(e.key, state)
       if (action === null) return
       e.preventDefault()

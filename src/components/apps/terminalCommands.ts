@@ -105,6 +105,9 @@ const commands: Record<string, Handler> = {
 
   clear: () => ({ lines: [], clear: true }),
 
+  /* Not in `help`. The classic answer, for the people who try it. */
+  sudo: () => out('guest is not in the sudoers file. This incident will be reported.'),
+
   play: (arg) => {
     if (arg === '') return out('Usage: play <youtube-url>')
     const videoId = extractVideoId(arg)

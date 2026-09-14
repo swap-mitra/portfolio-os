@@ -17,7 +17,7 @@
   padding: 8px;
   background: var(--ink-2);
   border: 2px solid var(--cyan);
-  box-shadow: 0 0 10px rgba(35, 240, 255, 0.35);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--cyan) 35%, transparent);
 }
 
 /* The player is audio-only; 1px keeps it rendered without showing it. */

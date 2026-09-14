@@ -12,6 +12,17 @@
   --yellow: #ffe14d;
   --green: #39ff88;
 
+  /* The Konami code swaps the chrome to a second neon set for the session
+     (Desktop.tsx). The canvas sunset keeps its own colours: they are painted,
+     not tokens, and a violet sky would be a different scene rather than a
+     different palette. */
+  &[data-palette='alt'] {
+    --magenta: #ff6a1a;
+    --cyan: #b26bff;
+    --yellow: #4dffd2;
+    --green: #ffd24d;
+  }
+
   /* Font stacks. 'Press Start 2P' is display only — titles, labels, buttons.
      'VT323' is body text inside windows. Both fall back to monospace so an
      unavailable webfont degrades to something still in the right spirit. */

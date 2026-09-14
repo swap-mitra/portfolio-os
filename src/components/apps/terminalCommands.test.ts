@@ -53,10 +53,14 @@ describe('runCommand', () => {
   })
 
   it('names the command it did not recognise', () => {
-    const { lines, videoId } = runCommand('sudo rm -rf /')
-    expect(lines[0]).toContain('sudo')
+    const { lines, videoId } = runCommand('frobnicate now')
+    expect(lines[0]).toContain('frobnicate')
     expect(lines[0]).toContain('help')
     expect(videoId).toBeUndefined()
+  })
+
+  it('reports the sudo incident', () => {
+    expect(runCommand('sudo rm -rf /').lines[0]).toContain('sudoers')
   })
 
   it('ignores case and surrounding whitespace', () => {
