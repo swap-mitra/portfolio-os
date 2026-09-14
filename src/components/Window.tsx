@@ -7,7 +7,7 @@ import { useEffect, useRef } from 'react'
 import { useOS } from '../state/osContext'
 import { focusById, iconId, taskbarTabId } from './focusIds'
 import { currentViewport } from './viewport'
-import { useDraggable } from '../hooks/useDraggable'
+import { isControlPress, useDraggable } from '../hooks/useDraggable'
 import { useResizable } from '../hooks/useResizable'
 import { useIsMobile } from '../hooks/useIsMobile'
 import { MIN_HEIGHT, MIN_WIDTH } from '../state/osReducer'
@@ -94,6 +94,9 @@ export function Window({ window: win }: { window: WindowState }) {
     (x, y) => dispatch({ type: 'MOVE_WINDOW', id: win.id, x, y }),
     () => win,
   )
+
+  const toggleMaximize = () =>
+    dispatch({ type: 'TOGGLE_MAXIMIZE', id: win.id, viewport: currentViewport() })
   const resize = useResizable(
     (width, height) => dispatch({ type: 'RESIZE_WINDOW', id: win.id, width, height }),
     () => win,
@@ -118,7 +121,16 @@ export function Window({ window: win }: { window: WindowState }) {
       }
       onPointerDown={focus}
     >
-      <div className="window-titlebar pixel" {...(isMobile ? {} : drag)}>
+      <div
+        className="window-titlebar pixel"
+        {...(isMobile ? {} : drag)}
+        /* Desktop convention. Same guard as the drag: a double-click that
+           started on a button belongs to the button. */
+        onDoubleClick={(e) => {
+          if (isMobile || isControlPress(e.target as HTMLElement)) return
+          toggleMaximize()
+        }}
+      >
         <span>{APP_LABELS[win.appType]}</span>
         <div className="window-btns">
           {/* Minimize and maximize mean nothing to a window that already
@@ -128,12 +140,7 @@ export function Window({ window: win }: { window: WindowState }) {
               <button aria-label="minimize" onClick={minimize}>
                 _
               </button>
-              <button
-                aria-label="maximize"
-                onClick={() =>
-                  dispatch({ type: 'TOGGLE_MAXIMIZE', id: win.id, viewport: currentViewport() })
-                }
-              >
+              <button aria-label="maximize" onClick={toggleMaximize}>
                 &#9633;
               </button>
             </>

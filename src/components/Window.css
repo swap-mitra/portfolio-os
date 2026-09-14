@@ -22,6 +22,24 @@
     0 0 14px rgba(255, 46, 107, 0.35);
   display: flex;
   flex-direction: column;
+  /* A window that pops into existence reads as a bug; a short scale-in reads
+     as a screen switching on. Also plays on restore from the taskbar, since
+     a minimized window unmounts and remounts. Short enough that it is over
+     before a drag could start. */
+  animation: window-open 120ms ease-out;
+}
+
+@keyframes window-open {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .window {
+    animation: none;
+  }
 }
 
 .window-titlebar {
