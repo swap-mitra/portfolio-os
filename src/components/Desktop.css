@@ -41,18 +41,23 @@
   animation: crt-off 350ms ease-in forwards;
 }
 
+/* The picture is mostly dark, so brightness alone never reads as a glowing
+   tube; the box-shadow is what draws the white line once the box is thin. */
 @keyframes crt-on {
   0% {
     transform: scale(0.3, 0.004);
     filter: brightness(4);
+    box-shadow: 0 0 8px 4px var(--paper);
   }
   45% {
     transform: scale(1, 0.004);
     filter: brightness(4);
+    box-shadow: 0 0 8px 4px var(--paper);
   }
   100% {
     transform: none;
     filter: none;
+    box-shadow: none;
   }
 }
 
@@ -60,14 +65,17 @@
   0% {
     transform: none;
     filter: none;
+    box-shadow: none;
   }
   55% {
     transform: scale(1, 0.004);
     filter: brightness(4);
+    box-shadow: 0 0 8px 4px var(--paper);
   }
   100% {
     transform: scale(0, 0.004);
     filter: brightness(4);
+    box-shadow: 0 0 8px 4px var(--paper);
   }
 }
 
