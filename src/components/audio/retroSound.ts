@@ -121,3 +121,9 @@ export function playThunk(): void {
     STING,
   )
 }
+
+/** One line of terminal output landing: the shortest tick here, pitched
+    low so a dozen in a row purr rather than chirp. */
+export function playTick(): void {
+  play([{ from: 700, to: 500, at: 0, duration: 0.015 }], CLICK)
+}

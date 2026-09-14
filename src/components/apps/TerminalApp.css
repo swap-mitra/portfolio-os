@@ -21,25 +21,68 @@
 }
 
 .terminal-form {
+  position: relative;
   display: flex;
   gap: 8px;
   align-items: baseline;
+}
+
+/* What the hidden input holds, echoed where the caret would be. */
+.terminal-echo {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  min-width: 0;
+  color: var(--paper);
+}
+
+/* A block cursor, because a terminal has one and the browser's hairline
+   caret gives the fiction away. Solid while the prompt is unfocused so the
+   window still reads as a terminal, blinking while it is. */
+.terminal-cursor {
+  display: inline-block;
+  width: 0.6em;
+  height: 1em;
+  margin-left: -6px;
+  background: var(--green);
+  vertical-align: text-bottom;
+  opacity: 0.5;
+}
+
+.terminal-form:focus-within .terminal-cursor {
+  opacity: 1;
+  animation: cursor-blink 1s steps(2) infinite;
+}
+
+@keyframes cursor-blink {
+  to {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .terminal-form:focus-within .terminal-cursor {
+    animation: none;
+  }
 }
 
 .terminal-prompt {
   flex-shrink: 0;
 }
 
+/* Over the whole row at opacity 0: it takes focus, keystrokes, and the
+   phone keyboard, while .terminal-echo and .terminal-cursor do the showing. */
 .terminal-input {
-  flex: 1;
-  min-width: 0;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  opacity: 0;
   background: none;
   border: none;
   padding: 0;
-  color: var(--paper);
+  color: transparent;
   font: inherit;
   /* The global :focus-visible ring is right everywhere else, but this input
      holds focus the entire time the window is open, so it would draw a
-     permanent box around the prompt. The caret is the focus indicator here. */
+     permanent box around the prompt. The block cursor is the focus indicator. */
   outline: none;
 }
