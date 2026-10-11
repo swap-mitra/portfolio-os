@@ -23,7 +23,7 @@ export function ResumeApp() {
           This browser won&apos;t preview PDFs inline. Use the download below.
         </p>
       </object>
-      <a className="pixel resume-download" href={RESUME_PATH} download>
+      <a className="pixel resume-download" href={RESUME_PATH} download="swapnil_mitra_cv.pdf">
         &#8681; DOWNLOAD RESUME.PDF
       </a>
     </div>

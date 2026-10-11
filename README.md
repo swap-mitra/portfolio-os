@@ -31,7 +31,7 @@ Planning docs live in `specs/` (gitignored — local reference only, not part of
 drive scene, CRT scanlines, icons, Start Menu, windows, taskbar, and the music widget.
 
 All five windows render real content. About and Projects read their copy from `src/data/`,
-Contact reads `siteConfig.ts`, Resume previews `public/resume.pdf` inline with a download button
+Contact reads `siteConfig.ts`, Resume previews `public/swapnil_mitra_cv.pdf` inline with a download button
 beside it, and Terminal runs a small hardcoded command set (`help`, `whoami`, `skills`,
 `projects`, and `play <youtube-url>`, which swaps the background track through the same action
 the music widget's URL box dispatches).
@@ -39,7 +39,7 @@ the music widget's URL box dispatches).
 The copy is real, not placeholder. Bio and skills live in `src/data/about.ts`, the project list
 in `src/data/projects.ts`, work history in `src/data/experience.ts` (the EXPERIENCE.LOG window
 and the terminal's `experience` command, there because the PDF does not preview on phones), email
-and profile links in `src/data/siteConfig.ts`, and the resume is `public/resume.pdf`. Nothing
+and profile links in `src/data/siteConfig.ts`, and the resume is `public/swapnil_mitra_cv.pdf`. Nothing
 else needs touching to update any of it.
 
 The retro mechanics, for anyone wondering whether they are deliberate: the boot sequence counts

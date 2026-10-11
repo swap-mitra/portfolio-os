@@ -1,5 +1,5 @@
 /* Work history for the EXPERIENCE.LOG window and the terminal's `experience`
-   command (architecture.md §4). Condensed from public/resume.pdf: the PDF
+   command (architecture.md §4). Condensed from public/swapnil_mitra_cv.pdf: the PDF
    cannot preview inline on most phones, so without this a visitor on mobile
    sees a download button and no history at all.
 

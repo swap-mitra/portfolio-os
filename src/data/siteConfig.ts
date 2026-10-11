@@ -85,4 +85,4 @@ export const contact = {
 
 /** Served straight out of public/, so the path is absolute from the site
     root and identical in dev and production (SPIKE-25). */
-export const RESUME_PATH = '/resume.pdf'
+export const RESUME_PATH = '/swapnil_mitra_cv.pdf'
