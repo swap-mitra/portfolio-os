@@ -8,6 +8,14 @@ import type { Project } from '../types/content'
 
 export const projects: Project[] = [
   {
+    id: 'heptapod',
+    title: 'HEPTAPOD',
+    description:
+      'One tool interface that lets an LLM agent operate enterprise systems speaking REST, SOAP, and SQL. An auth layer turns the declared scheme of each backend (API key, OAuth2 client credentials, HTTP basic) into request credentials, so a new system is one adapter class and one config entry, and the agent never changes.',
+    stack: 'Python, Claude API, OpenRouter, LLM tool calling, FastAPI, OAuth2, SOAP',
+    link: 'https://github.com/swap-mitra/heptapod',
+  },
+  {
     id: 'memvault',
     title: 'MEMVAULT',
     description:
@@ -22,14 +30,6 @@ export const projects: Project[] = [
       'Multi-tenant outreach workspace that ingests a job URL behind an SSRF guard and drafts evidence-cited email through hybrid retrieval over a halfvec HNSW index. Human-in-the-loop by construction: append-only draft versions, reviewer-attributed approvals, a full audit trail, and Gmail export that only ever writes drafts.',
     stack: 'Next.js, Drizzle, Postgres + pgvector, Inngest, OpenRouter',
     link: 'https://github.com/swap-mitra/groundwork',
-  },
-  {
-    id: 'city-vault',
-    title: 'CITY_VAULT',
-    description:
-      'Multi-tenant records governance platform: six-role RBAC, full document lifecycle, content-addressed storage pinned to IPFS, and append-only audit trails. Sliding-window rate limiting per key, a Vitest suite over the route handlers and governance workflows, and a deliberately brutalist interface.',
-    stack: 'Next.js 15, Prisma, Neon Postgres, Pinata (IPFS), Tailwind 4',
-    link: 'https://github.com/swap-mitra/city-vault',
   },
   {
     id: 'agrisetu',
