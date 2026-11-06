@@ -8,6 +8,14 @@ import type { Project } from '../types/content'
 
 export const projects: Project[] = [
   {
+    id: 'flight-recorder',
+    title: 'FLIGHT_RECORDER',
+    description:
+      'A flight recorder for AI agents, published on PyPI. Every model and tool call lands in a plain JSONL cassette with tokens, cost, and latency, and the same cassette replays the run as a pytest regression test in CI with one verdict: same, changed, or failed. Budget caps and model routing run before each call, and approval gates hold irreversible tool calls and fail closed. Recording adds under 2 ms per call.',
+    stack: 'Python, OpenAI + Anthropic SDKs, LangChain/LangGraph, OpenTelemetry, pytest',
+    link: 'https://github.com/swap-mitra/ai-flight-recorder',
+  },
+  {
     id: 'heptapod',
     title: 'HEPTAPOD',
     description:
