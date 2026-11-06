@@ -15,7 +15,7 @@ export const experience = {
     {
       company: 'ADROSONIC',
       title: 'Research and Innovation Engineer',
-      period: 'Jul 2023 - Present',
+      period: 'Jul 2023 - Oct 2026',
       location: 'Mumbai',
       engagements: [
         {
